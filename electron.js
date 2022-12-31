@@ -13,28 +13,32 @@ ipcMain.on('ready', (event, title) => {
   console.log('ready');
 })
         
-ipcMain.on('get-serving-content', (event, title) => {
+ipcMain.on('select-file-dialog', (event, title) => {
+  console.log('select-file-dialog'); 
 
+  dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
+      if (!response.canceled) {
+          // handle fully qualified file name
+        console.log(response);
+        event.reply('select-file-result', response.filePaths) 
+      } else {
+        console.log("no file selected");
+        event.reply('select-file-result', null) 
+      }
+  });
 })
 
-ipcMain.on('add-files', (event, pathes) => {
-    console.log('add-files', pathes); 
-})  
-ipcMain.on('get-files', (event, pathes) => { 
-    event.reply('files', this.serveList) 
-})  
-
-ipcMain.on('get-interfaces', (event, title) => { 
-    var networkInterfaces = os.networkInterfaces(); 
-    event.reply('network-interfaces', networkInterfaces) 
-})
+ipcMain.on('new-server', (event, newServer) => {
+    console.log('new-server', newServer); 
+})   
 
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 400,
     height: 650,
-    autoHideMenuBar: true,
+    // autoHideMenuBar: true,
+    title: 'SSH Tunnel Proxy',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,

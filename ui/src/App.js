@@ -1,13 +1,16 @@
  
 import styles from './App.module.scss';
+import AddServer from './pages/AddServer';
 
-const { ipcRenderer } = window.require("electron"); 
-ipcRenderer.send('ready')
+import uiEvents from './ui-event-dispatcher'
+
+// const { ipcRenderer } = window.require("electron"); 
+// ipcRenderer.send('ready')
 
 function App() {
   return (
-    <div className="App"> 
-      hello    sad
+    <div className={styles.App}> 
+      <AddServer /> 
     </div>
   ); 
 }
