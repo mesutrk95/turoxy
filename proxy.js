@@ -84,7 +84,7 @@ class SSHProxy {
                 info.dstPort,
                 (err, resultStream) => {
     
-                    console.log(`transmit ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort}`);   
+                    console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
     
                     if (err) { 
                         console.log('error exception', err);
@@ -94,10 +94,7 @@ class SSHProxy {
     
                     const clientSocket = accept(true);
                     if (clientSocket) { 
-                        try { 
-                            // resultStream.pipe(clientSocket).on('data', (data)=>{
-                            //     console.log(data);
-                            // })
+                        try {  
                             resultStream
                                 .pipe(clientSocket)
                                 .pipe(resultStream)

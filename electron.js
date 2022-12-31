@@ -2,23 +2,59 @@
 
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron')
+const isDev = require('electron-is-dev');
 const path = require('path')
 
-const proxy = require('./proxy')
+const { ipcMain , dialog } = require('electron') 
+
+// const proxy = require('./proxy')
+
+ipcMain.on('ready', (event, title) => { 
+  console.log('ready');
+})
+        
+ipcMain.on('get-serving-content', (event, title) => {
+
+})
+
+ipcMain.on('add-files', (event, pathes) => {
+    console.log('add-files', pathes); 
+})  
+ipcMain.on('get-files', (event, pathes) => { 
+    event.reply('files', this.serveList) 
+})  
+
+ipcMain.on('get-interfaces', (event, title) => { 
+    var networkInterfaces = os.networkInterfaces(); 
+    event.reply('network-interfaces', networkInterfaces) 
+})
 
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 400,
+    height: 650,
+    autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    } 
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  // mainWindow.loadFile('index.html')
+  mainWindow.loadURL(
+    isDev
+      ? 'http://localhost:25489'
+      : `file://${path.join(__dirname, '../build/index.html')}`
+  );
 
+  // Open the DevTools.
+  if (isDev) {
+    win.webContents.openDevTools({ mode: 'detach' });
+  }
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 }
