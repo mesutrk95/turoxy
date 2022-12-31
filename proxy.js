@@ -4,38 +4,27 @@ const SSH2 = require('ssh2');
 const regedit = require('regedit').promisified
 // const GlobalProxy = require("node-global-proxy").default;
 // const globalTunnel = require('global-tunnel-ng');
-
-const sshServer = {
-    host: '3.126.153.90',
-    port: 22,
-    username: 'ubuntu',
-    privateKey: readFileSync('C:/Users/MasoudRK/Downloads/Telegram Desktop/german-key.pem', 'utf8'),
-    keepaliveInterval: 50000,
-    //   debug: (s) => {console.log(s)} 
-}
-
-const socksServer = {
-    host: '127.0.0.1',
-    port: 54612
-}
  
 class SSHClient {
 
     config = null;
     conn = null;
     isOpen = false;
+    dead = false;
 
     constructor(config){
         this.config = config;
-        this.isOpen = false
     }
 
     async start(){
+        this.isOpen = false
+        
         this.conn = await this.connect();
         this.conn.on('close',async () => {
             console.log('closed');
             this.isOpen = false; 
             this.conn = null;
+            if(this.dead) return;
 
             try {
                 await this.start();
@@ -52,6 +41,11 @@ class SSHClient {
         }); 
     }
 
+    stop(){
+        this.dead = true;
+        if(this.conn) this.conn.end()
+    }
+
     connect(){ 
         return new Promise((resolve, reject)=>{
             const conn = new SSH2.Client(); 
@@ -66,17 +60,17 @@ class SSHClient {
 }
 
 class SSHProxy {
-    constructor(){
-
+    constructor(config){
+        this.config = config; 
     }
- 
+    
     async start(){ 
         await this.enableSystemProxy();
 
-        const sshClient = new SSHClient(sshServer);
-        await sshClient.start();
+        this.sshClient = new SSHClient(this.config.sshServer);
+        await this.sshClient.start();
     
-        const socksInstance = socks.createServer((info, accept, deny) => {
+        this.socksInstance = socks.createServer((info, accept, deny) => {
             console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
     
             sshClient.conn.forwardOut(info.srcAddr, info.srcPort,
@@ -113,22 +107,22 @@ class SSHProxy {
             }); 
         })
     
-        socksInstance.listen(socksServer.port, socksServer.host, () => {
+        this.socksInstance.listen(this.config.socksServer.port, this.config.socksServer.host, () => {
             console.log('SOCKSv5 proxy server started on ' + socksServer.host + ':' + socksServer.port);
-        }).useAuth(socks.auth.None());
-    
-    
-    
+        }).useAuth(socks.auth.None()); 
     }
     
+    async stop(){
+        this.sshClient.stop();
+        this.socksInstance.close()
+    }
 
-    async enableSystemProxy(){
-        
+    async enableSystemProxy(){ 
         console.log('setting registry keys.');
         await regedit.putValue({
             'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
                 ProxyServer: {
-                    value: 'socks=' + socksServer.host + ':' + socksServer.port, type: 'REG_SZ'
+                    value: 'socks=' + this.config.socksServer.host + ':' + this.config.socksServer.port, type: 'REG_SZ'
                 },
                 ProxyOverride: {
                     value: 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*',
@@ -157,15 +151,12 @@ class SSHProxy {
         //   });
     } 
     
-}
- 
-const sshProxy = new SSHProxy()
-sshProxy.start();
+} 
 
-module.exports = sshProxy;
+module.exports = SSHProxy;
 
-process.on('uncaughtException', function (error) { 
+// process.on('uncaughtException', function (error) { 
 
-    console.log('uncaughtException' , error);
-})
+//     console.log('uncaughtException' , error);
+// })
 

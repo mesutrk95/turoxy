@@ -1,0 +1,43 @@
+
+.dialogContainer{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    z-index: 100; 
+    background-color: rgba(0, 0, 0, 0.377);
+    backdrop-filter: blur(6px);
+ 
+    .dialog {
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px; 
+        min-width: 70%;  
+        max-width: 90%;  
+
+        p {
+            margin: 0;
+        }
+        
+        .content{
+
+        }
+    }
+
+    &.success {
+        background-color: rgba(0, 0, 0, 0.274);
+    }
+    &.warning{
+        background-color: rgba(251, 255, 0, 0.377);
+    }
+    &.danger{
+        background-color: rgba(226, 26, 0, 0.322);
+    }
+
+}
