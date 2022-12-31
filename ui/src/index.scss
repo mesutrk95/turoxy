@@ -1,9 +1,14 @@
 
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+@font-face {
+  font-family: 'Changa';
+  src: local('/fonts/changa/Changa-VariableFont_wght.ttf');
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Changa', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -1,6 +1,8 @@
  
+import { useState } from 'react';
 import styles from './App.module.scss';
 import AddServer from './pages/AddServer';
+import MainPage from './pages/MainPage';
 
 import uiEvents from './ui-event-dispatcher'
 
@@ -8,9 +10,19 @@ import uiEvents from './ui-event-dispatcher'
 // ipcRenderer.send('ready')
 
 function App() {
+  const [page, setPage] = useState('main')
+
+
   return (
     <div className={styles.App}> 
-      <AddServer /> 
+      <div className={styles.addServerBtn} onClick={e => setPage('add-server')}>
+          <span>
+            +
+          </span>
+      </div>
+      { page === 'main' && <MainPage /> }
+      { page === 'add-server' && <AddServer back={()=>setPage('main')} /> }
+      
     </div>
   ); 
 }

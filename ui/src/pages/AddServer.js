@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react'
 import styles from './AddServer.module.scss' 
 import uiEventDispatcher from '../ui-event-dispatcher' 
 
-export default function AddServer() {
+export default function AddServer(props) {
      
+    const [label, setLabel] = useState('')
     const [host, setHost] = useState('')
     const [port, setPort] = useState('')
     const [user, setUser] = useState('')
@@ -35,6 +36,7 @@ export default function AddServer() {
             host, 
             port, 
             user, 
+            label, 
             auth: { 
                 method: authMethod
             } 
@@ -46,6 +48,7 @@ export default function AddServer() {
             newServer.auth.privateKey = privateKeyPath; 
         }
         uiEventDispatcher.send('new-server', newServer)  
+        props.back();
     }
 
     function handleAuthMethodChange(e){ 
@@ -55,7 +58,7 @@ export default function AddServer() {
 
     return (
         <div className={`${styles.addServer} p-3`}>
-            <h3 className="mb-4">New SSH Connection</h3>
+            <h3 className="mb-4">New SSH Connection</h3> 
             <div className="row">
                 <div className="input-group mb-2">
                     <span className={`${styles.caption} input-group-text`} id="hostname">Host</span>
@@ -63,7 +66,7 @@ export default function AddServer() {
                             value={host} onChange={e => setHost(e.target.value)} />
                 </div> 
                 <div className="input-group mb-2">
-                    <span className={`${styles.caption} input-group-text`} id="hostname">Port</span>
+                    <span className={`${styles.caption} input-group-text`} id="port">Port</span>
                     <input type="text" className="form-control" placeholder="SSH Port ..." 
                         value={port} onChange={e => setPort(e.target.value)}/>
                 </div>  
@@ -72,6 +75,11 @@ export default function AddServer() {
                     <input type="text" className="form-control" placeholder="SSH User (root) ..." 
                         value={user} onChange={e => setUser(e.target.value)}/>
                 </div>  
+                <div className="input-group mb-2">
+                    <span className={`${styles.caption} input-group-text`} id="label">Label</span>
+                    <input type="text" className="form-control" placeholder="Tunnel name ..." 
+                            value={host} onChange={e => setLabel(e.target.value)} />
+                </div> 
             </div> 
             <div className="row py-3">
                 <div className="col-auto text-start" >
@@ -94,7 +102,7 @@ export default function AddServer() {
 
                 </div>
             </div>
-            <div className={`row mt-3 ${authMethod == 'basic'? 'd-block': 'd-none'}`}  >
+            <div className={`row mt-2 ${authMethod == 'basic'? 'd-block': 'd-none'}`}  >
                 <div className="input-group mb-2">
                     <span className={`${styles.caption} input-group-text`} id="username">Username</span>
                     <input type="text" className="form-control" placeholder="Auth Username ..." 
@@ -109,9 +117,10 @@ export default function AddServer() {
             
             <div className={`row mt-3 ${authMethod == 'pubkey'? 'd-block': 'd-none'}`}  >
                  
-                <div class="input-group mb-3">
-                    <button class="btn btn-secondary" type="button" onClick={ e => selectFile() }>Select File</button>
-                    <input type="text" className="form-control" placeholder="Private key file ..." value={privateKeyPath}/> 
+                <div className="input-group mb-3">
+                    <button className="btn btn-secondary" type="button" onClick={ e => selectFile() }>Select File</button>
+                    <input type="text" className="form-control" placeholder="Private key file ..." 
+                            value={privateKeyPath} onChange={e=> setPrivateKeyPath(e.target.value)}/> 
                 </div>
  
             </div> 
