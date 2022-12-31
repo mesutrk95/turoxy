@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
+    "global-tunnel-ng": "^2.7.1",
+    "node-global-proxy": "^1.0.1",
     "node-ssh-forward": "^0.7.2",
     "regedit": "=5.0.0",
     "socksv5": "^0.0.6",
