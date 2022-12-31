@@ -1,5 +1,5 @@
  
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './App.module.scss'; 
 import DialogProvider from './DialogProvider';
 import AddServer from './pages/AddServer';
@@ -11,15 +11,22 @@ import uiEvents from './ui-event-dispatcher'
 function App() {
   const [page, setPage] = useState('main')
 
-  uiEvents.listen('ssh-connection', (conn) => {
-    setPage('ssh-connection')
-    console.log('ssh-connection', conn);
-  })
+  useEffect(()=>{
 
-  uiEvents.listen('ssh-disconnect', ( ) => {
-    setPage('main')
-    console.log('ssh-disconnect');
-  })
+    const connHandler = uiEvents.listen('ssh-connection', (conn) => {
+      setPage('ssh-connection')
+      console.log('ssh-connection', conn);
+    })
+  
+    const disHandler = uiEvents.listen('ssh-disconnect', ( ) => {
+      setPage('main')
+      console.log('ssh-disconnect');
+    })
+    return ()=>{
+      connHandler.unregister()
+      disHandler.unregister()
+    }
+  }, [])
 
   return (
     <div className={styles.App}> 

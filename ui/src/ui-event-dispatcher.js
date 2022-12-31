@@ -30,9 +30,11 @@ class UIEventDispatcher {
         }
 
         chnl.push(callback)
+        this.listeners.set(channel, chnl);
 
         if(justMade){
-            ipcRenderer.on(channel, (evt, data)=>{ 
+            ipcRenderer.on(channel, (evt, data)=>{  
+                console.log('emit', channel, chnl.length);
                 chnl.forEach(c => c(data));
             })  
         } 

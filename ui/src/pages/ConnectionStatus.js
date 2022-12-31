@@ -10,14 +10,17 @@ export default function ConnectionStatus(props) {
     const [stats, setStats] = useState({  }) 
 
     useEffect(() => {  
-        uiEvent.listen('ssh-connection', (conn) => {
+        let handler1 = uiEvent.listen('ssh-connection', (conn) => {
             setConnStatus(conn.status)
+            console.log(conn);
         });
-        uiEvent.listen('connection-stats', (stats) => {
+        let handler2 = uiEvent.listen('connection-stats', (stats) => {
             setStats(stats)
         });
         
         return () => { 
+            handler1.unregister()
+            handler2.unregister()
         }
     }, []) 
 
@@ -28,11 +31,12 @@ export default function ConnectionStatus(props) {
     return (
         <div className={`${styles.addServer} p-3`}> 
             <h3 className="mb-4">Connection Status</h3>  
+            {JSON.stringify(connStatus)}
             {
                 connStatus && 
                 <div>
-                    <h5>Socks Server : {connStatus.socks}</h5>
                     <h5>SSH Connection : {connStatus.ssh}</h5> 
+                    <h5>Socks Server : {connStatus.socks}</h5>
                 </div>
             }
             <div className='row mt-4'>

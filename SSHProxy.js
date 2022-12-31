@@ -99,9 +99,9 @@ class SSHProxy extends EventEmitter{
     async stop(){
         clearInterval(this.statesIntervalHandler)
         console.log('disconnecting ssh client ...');
-        this.sshClient.stop();
+        if(this.sshClient) this.sshClient.stop();
         console.log('stopping socks server ...');
-        await this.socks.stop()
+        if(this.socks) await this.socks.stop()
         console.log('clearing system proxy ...');
         await this.disableSystemProxy(); 
         console.log('done.');
