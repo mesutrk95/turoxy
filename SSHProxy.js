@@ -1,63 +1,11 @@
-const socks = require('socksv5');
+
 const { readFileSync } = require('fs');
-const SSH2 = require('ssh2');
 const regedit = require('regedit').promisified
 // const GlobalProxy = require("node-global-proxy").default;
 // const globalTunnel = require('global-tunnel-ng');
  
-class SSHClient {
-
-    config = null;
-    conn = null;
-    isOpen = false;
-    dead = false;
-
-    constructor(config){
-        this.config = config;
-    }
-
-    async start(){
-        this.isOpen = false
-        
-        this.conn = await this.connect();
-        this.conn.on('close',async () => {
-            console.log('closed');
-            this.isOpen = false; 
-            this.conn = null;
-            if(this.dead) return;
-
-            try {
-                await this.start();
-                this.isOpen = true; 
-            } catch (error) {  
-                console.log('error', error);
-            }
-        });
-        this.conn.on('error', (err) => {
-            console.log('error', err);
-        });
-        this.conn.on('end', () => {
-            console.log('end');
-        }); 
-    }
-
-    stop(){
-        this.dead = true;
-        if(this.conn) this.conn.end()
-    }
-
-    connect(){ 
-        return new Promise((resolve, reject)=>{
-            const conn = new SSH2.Client(); 
-
-            conn.on('ready', async () => {
-                // this.isOpen = true;
-                console.log('connected to ssh server => ' + this.config.host + ':' + this.config.port);
-                resolve(conn)  
-            }).connect(this.config); 
-        }) 
-    } 
-}
+const SSHClient = require('./SSHClient')
+const SocksServer = require('./SocksServer')
 
 class SSHProxy {
     constructor(config){
@@ -65,12 +13,16 @@ class SSHProxy {
     }
     
     async start(){ 
-        await this.enableSystemProxy();
 
-        this.sshClient = new SSHClient(this.config.sshServer);
+        this.sshClient = new SSHClient(this.config.ssh);
         await this.sshClient.start();
-    
-        this.socksInstance = socks.createServer((info, accept, deny) => {
+
+        this.socks = new SocksServer(this.config.socks);
+        await this.socks.start();
+        
+        await this.enableSystemProxy(); 
+
+        this.socks.onRequest = (info, accept, deny) => {
             console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
     
             sshClient.conn.forwardOut(info.srcAddr, info.srcPort,
@@ -105,16 +57,12 @@ class SSHProxy {
     
                     } 
             }); 
-        })
-    
-        this.socksInstance.listen(this.config.socksServer.port, this.config.socksServer.host, () => {
-            console.log('SOCKSv5 proxy server started on ' + socksServer.host + ':' + socksServer.port);
-        }).useAuth(socks.auth.None()); 
+        }
     }
     
     async stop(){
         this.sshClient.stop();
-        this.socksInstance.close()
+        await this.socks.stop()
     }
 
     async enableSystemProxy(){ 

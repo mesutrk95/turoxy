@@ -9,7 +9,7 @@ const { app, BrowserWindow } = require('electron')
 
 const { ipcMain , dialog } = require('electron') 
  
-const SSHProxy = require('./proxy');
+const SSHProxy = require('./SSHProxy');
 
 let sshProxy;
 const DATA_FILE_PATH = path.join(__dirname , 'config.json')
@@ -81,7 +81,7 @@ ipcMain.on('delete-server', (event, server) => {
   event.reply('server-deleted', allServers) 
 })   
 
-ipcMain.on('connect-server', (event, server) => { 
+ipcMain.on('connect-server', async (event, server) => { 
   console.log('connect-server', server);    
   const selectedServer = allServers.find( s => s.time === server.time)
    
@@ -100,12 +100,13 @@ ipcMain.on('connect-server', (event, server) => {
   }
 
   if(sshProxy){
-    sshProxy.stop()
+    await sshProxy.stop()
   }
-  sshProxy = new SSHProxy({ sshServer, socksServer })
-  sshProxy.start()
-  
-  event.reply('connection-status', { server : selectedServer }) 
+
+  sshProxy = new SSHProxy({ ssh, socks })
+  await sshProxy.start()
+
+  event.reply('ssh-connection', { server : selectedServer }) 
 })   
 
 const createWindow = () => {
@@ -128,7 +129,7 @@ const createWindow = () => {
   mainWindow.loadURL(
     isDev
       ? 'http://localhost:25489'
-      : `file://${path.join(__dirname, '../build/index.html')}`
+      : `file://${path.join(__dirname, './ui/build/index.html')}`
   );
 
   // Open the DevTools.

@@ -11,8 +11,8 @@ import uiEvents from './ui-event-dispatcher'
 function App() {
   const [page, setPage] = useState('main')
 
-  uiEvents.listen('connection-status', (server) => {
-    setPage('connection-status')
+  uiEvents.listen('ssh-connection', (server) => {
+    setPage('ssh-connection')
   })
 
   return (
@@ -27,7 +27,7 @@ function App() {
         }
         { page === 'main' && <MainPage /> }
         { page === 'add-server' && <AddServer back={()=>setPage('main')} /> }
-        { page === 'connection-status' && <ConnectionStatus back={()=>setPage('main')} /> }
+        { page === 'ssh-connection' && <ConnectionStatus back={()=>setPage('main')} /> }
 
       </DialogProvider>
     </div>
