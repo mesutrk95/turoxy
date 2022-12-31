@@ -32,7 +32,7 @@
     "node-global-proxy": "^1.0.1",
     "node-ssh-forward": "^0.7.2",
     "regedit": "=5.0.0",
-    "socksv5": "^0.0.4",
+    "socksv5": "^0.0.6",
     "ssh2": "^1.11.0"
   }
 }

@@ -17,11 +17,16 @@ class SocksServer {
 
     stop() {
         return new Promise((resolve, reject) => {
-            if(this.socksServer == null) return;
-            this.socksServer.close(()=>{
-                this.listening = false
+            if(this.socksServer == null) {  
                 resolve()
-            })
+                return ;
+            }
+            const onClose =()=>{ 
+                this.listening = false
+                resolve() 
+            } 
+            this.socksServer.on('close' , ()=> onClose()) 
+            this.socksServer.close(()=> onClose()) 
         }) 
     }
 

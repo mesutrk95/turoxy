@@ -9,6 +9,13 @@ const SocksServer = require('./SocksServer')
 const EventEmitter = require('events');
 
 class SSHProxy extends EventEmitter{
+
+    statesIntervalHandler
+    stats = {
+        send: 0,
+        receive: 0
+    }
+
     constructor(config){
         super();
         this.config = config; 
@@ -28,9 +35,10 @@ class SSHProxy extends EventEmitter{
 
     async start(){  
 
-        this.emitStatus(); 
-        this.socks = new SocksServer(this.config.socks);
-        await this.socks.start();
+        clearInterval(this.statesIntervalHandler)
+        this.statesIntervalHandler = setInterval(() => {
+            this.emit("stats", this.stats ); 
+        }, 500); 
 
         this.emitStatus();
         this.sshClient = new SSHClient(this.config.ssh);
@@ -38,50 +46,65 @@ class SSHProxy extends EventEmitter{
             this.emitStatus();
         })
         await this.sshClient.connect(); 
+
+        this.emitStatus(); 
+        this.socks = new SocksServer(this.config.socks);
+        await this.socks.start(); 
         
         this.emitStatus();
         await this.enableSystemProxy(); 
 
         this.socks.onRequest = (info, accept, deny) => {
             console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-            accept()
-            // this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
-            //     (err, resultStream) => {
     
-            //         console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
+            this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
+                (err, resultStream) => {
     
-            //         if (err) { 
-            //             console.log('error exception', err);
-            //             return deny();
-            //             // return;
-            //         } 
-            //         const clientSocket = accept(true);
-            //         if (clientSocket) { 
-            //             try {  
-            //                 resultStream
-            //                     .pipe(clientSocket)
-            //                     .pipe(resultStream)
-            //                          .on('error', () => { 
-            //                              console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
-            //                          })   
-            //                          .on('close', () => { 
-            //                             //  console.log(`transmitted.`);   
-            //                          });
-            //             } catch (ex) {
-            //                 console.log('exception', ex);
-            //             }
-            //         } else { 
+                    console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
     
-            //         } 
-            // }); 
+                    if (err) { 
+                        console.log('error exception', err);
+                        return deny();
+                        // return;
+                    } 
+                    const clientSocket = accept(true);
+                    if (clientSocket) { 
+                        try {  
+                            clientSocket.on('data', data => {  
+                               this.stats.send += data.length
+                            //    console.log(this.stats, data.length);
+                            });
+                            resultStream.on('data', data => {   
+                               this.stats.receive += data.length 
+                            //    console.log(this.stats, data.length);
+                            });
+                            
+
+                            resultStream
+                                .pipe(clientSocket)
+                                .pipe(resultStream)
+                                     .on('error', () => { 
+                                         console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
+                                     })   
+                        } catch (ex) {
+                            console.log('exception', ex);
+                        }
+                    } else { 
+    
+                    } 
+            }); 
         }
     }
     
     async stop(){
-        await this.disableSystemProxy();
-        
+        clearInterval(this.statesIntervalHandler)
+        console.log('disconnecting ssh client ...');
         this.sshClient.stop();
+        console.log('stopping socks server ...');
         await this.socks.stop()
+        console.log('clearing system proxy ...');
+        await this.disableSystemProxy(); 
+        console.log('done.');
     }
 
     async disableSystemProxy(){ 
@@ -129,9 +152,3 @@ class SSHProxy extends EventEmitter{
 } 
 
 module.exports = SSHProxy;
-
-// process.on('uncaughtException', function (error) { 
-
-//     console.log('uncaughtException' , error);
-// })
-

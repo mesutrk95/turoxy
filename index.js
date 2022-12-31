@@ -126,6 +126,9 @@ ipcMain.on('connect-server', async (event, server) => {
   sshProxy.on('status', (status)=>{
     event.reply('ssh-connection', { server : selectedServer, status}) 
   })
+  sshProxy.on('stats', (stats)=>{
+    event.reply('connection-stats', stats) 
+  })
   event.reply('ssh-connection', { server : selectedServer, status : sshProxy.status}) 
 
 })   
@@ -183,3 +186,8 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+process.on('uncaughtException', function (error) {  
+  console.log('uncaughtException' , error);
+})
+
