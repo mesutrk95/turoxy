@@ -1,6 +1,6 @@
-// main.js
-
+ 
 console.log('ok');
+
 // Modules to control application life and create native browser window
 const isDev = require('electron-is-dev');
 const path = require('path')
@@ -11,8 +11,9 @@ const { ipcMain , dialog } = require('electron')
  
 const SSHProxy = require('./SSHProxy');
 
-let sshProxy;
 const DATA_FILE_PATH = path.join(__dirname , 'config.json')
+
+let sshProxy = null;
 let allServers = [];
 if(fs.existsSync(DATA_FILE_PATH)){
   allServers = JSON.parse(fs.readFileSync(DATA_FILE_PATH)) 
@@ -81,32 +82,52 @@ ipcMain.on('delete-server', (event, server) => {
   event.reply('server-deleted', allServers) 
 })   
 
+ipcMain.on('ssh-disconnect', async (event, server) => { 
+  
+  if(sshProxy){
+    await sshProxy.stop()
+    sshProxy = null;
+  }
+
+  event.reply('ssh-disconnect') 
+  
+})
+
 ipcMain.on('connect-server', async (event, server) => { 
   console.log('connect-server', server);    
   const selectedServer = allServers.find( s => s.time === server.time)
    
-  const sshServer = {
+  const ssh = {
     host: selectedServer.host,
     port: selectedServer.port,
     username: selectedServer.user,
-    privateKey: selectedServer.privateKey,
     keepaliveInterval: 30000,
     //   debug: (s) => {console.log(s)} 
   }
+  if(selectedServer.auth.method == 'pubkey'){
+    ssh.privateKey = selectedServer.auth.privateKey  
+  }else if(selectedServer.auth.method == 'basic'){
+    ssh.password = selectedServer.auth.password  
+  }
 
-  const socksServer = {
+  const socks  = {
     host: '127.0.0.1',
     port: 54612
   }
 
   if(sshProxy){
     await sshProxy.stop()
+    sshProxy = null;
   }
 
   sshProxy = new SSHProxy({ ssh, socks })
-  await sshProxy.start()
+  sshProxy.start()
 
-  event.reply('ssh-connection', { server : selectedServer }) 
+  sshProxy.on('status', (status)=>{
+    event.reply('ssh-connection', { server : selectedServer, status}) 
+  })
+  event.reply('ssh-connection', { server : selectedServer, status : sshProxy.status}) 
+
 })   
 
 const createWindow = () => {

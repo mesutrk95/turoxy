@@ -11,8 +11,7 @@ export default function AddServer(props) {
     const [port, setPort] = useState('')
     const [user, setUser] = useState('')
 
-    const [authMethod, setAuthMethod] = useState('basic')
-    const [basicAuthUser, setBasicAuthUser] = useState('')
+    const [authMethod, setAuthMethod] = useState('basic') 
     const [basicAuthPass, setBasicAuthPass] = useState('') 
     const [privateKeyPath, setPrivateKeyPath] = useState('') 
     const [privateKeyContent, setPrivateKeyContent] = useState('')  
@@ -49,9 +48,7 @@ export default function AddServer(props) {
         if(authMethod == 'pubkey'){
             if(!privateKeyPath || privateKeyPath === '') 
                 throw new Error('Please select private key file for authentication!')  
-        }  else if(authMethod == 'basic') {
-            if(!basicAuthUser || basicAuthUser === '') 
-                throw new Error('Please fill the username field for basic authentication.')  
+        }  else if(authMethod == 'basic') { 
             if(!basicAuthPass || basicAuthPass === '') 
                 throw new Error('Please fill the password field for basic authentication.')   
         }
@@ -74,8 +71,7 @@ export default function AddServer(props) {
                 method: authMethod
             } 
         }
-        if(authMethod == 'basic'){
-            newServer.auth.username = basicAuthUser;
+        if(authMethod == 'basic'){ 
             newServer.auth.password = basicAuthPass; 
         } else if ( authMethod == 'pubkey'){   
             newServer.auth.privateKey = privateKeyContent;  
@@ -142,12 +138,7 @@ export default function AddServer(props) {
 
                 </div>
             </div>
-            <div className={`row mt-1 ${authMethod == 'basic'? 'd-block': 'd-none'}`}  >
-                <div className="input-group mb-2">
-                    <span className={`${styles.caption} input-group-text`} id="username">Username</span>
-                    <input type="text" className="form-control" placeholder="Auth Username ..." 
-                            value={basicAuthUser} onChange={e=> setBasicAuthUser(e.target.value)}/>
-                </div> 
+            <div className={`row mt-1 ${authMethod == 'basic'? 'd-block': 'd-none'}`}  > 
                 <div className="input-group mb-2">
                     <span className={`${styles.caption} input-group-text`} id="password">Password</span>
                     <input type="text" className="form-control" placeholder="Auth Password ..."

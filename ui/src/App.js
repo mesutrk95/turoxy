@@ -11,8 +11,14 @@ import uiEvents from './ui-event-dispatcher'
 function App() {
   const [page, setPage] = useState('main')
 
-  uiEvents.listen('ssh-connection', (server) => {
+  uiEvents.listen('ssh-connection', (conn) => {
     setPage('ssh-connection')
+    console.log('ssh-connection', conn);
+  })
+
+  uiEvents.listen('ssh-disconnect', ( ) => {
+    setPage('main')
+    console.log('ssh-disconnect');
   })
 
   return (
