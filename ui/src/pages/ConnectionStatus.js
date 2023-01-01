@@ -17,12 +17,13 @@ export default function ConnectionStatus(props) {
         let handler2 = uiEvent.listen('connection-stats', (stats) => {
             setStats(stats)
         });
+        uiEvent.send('ssh-connection')
         
         return () => { 
             handler1.unregister()
             handler2.unregister()
         }
-    }, []) 
+    }, [uiEvent.time]) 
 
     function disconnect() {
         uiEvent.send('ssh-disconnect');
@@ -30,8 +31,7 @@ export default function ConnectionStatus(props) {
 
     return (
         <div className={`${styles.addServer} p-3`}> 
-            <h3 className="mb-4">Connection Status</h3>  
-            {JSON.stringify(connStatus)}
+            <h3 className="mb-4">Connection Status</h3>   
             {
                 connStatus && 
                 <div>

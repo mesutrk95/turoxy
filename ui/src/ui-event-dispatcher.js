@@ -10,31 +10,34 @@ try {
 
 class UIEventDispatcher {
 
+    subsicribedChannels = new Set;
     listeners = new Map;
+    time;
 
     constructor(){
-
+        this.time = 0;
     }
 
     send(channel, data){
         ipcRenderer.send(channel, data)
+        this.time = new Date().getTime()
     }
 
     listen(channel, callback){
-        let chnl = this.listeners.get(channel);
-        let justMade = false;
+        this.time = new Date().getTime()
+        let chnl = this.listeners.get(channel); 
         if(!chnl){
             chnl = [];
-            this.listeners.set(channel, chnl);
-            justMade = true;
+            this.listeners.set(channel, chnl); 
         }
 
         chnl.push(callback)
         this.listeners.set(channel, chnl);
 
-        if(justMade){
+        if(!this.subsicribedChannels.has(channel)){
+            this.subsicribedChannels.add(channel)
             ipcRenderer.on(channel, (evt, data)=>{  
-                console.log('emit', channel, chnl.length);
+                // console.log('emit', channel, chnl.length);
                 chnl.forEach(c => c(data));
             })  
         } 

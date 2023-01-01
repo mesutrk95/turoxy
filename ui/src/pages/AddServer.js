@@ -16,7 +16,7 @@ export default function AddServer(props) {
     const [privateKeyPath, setPrivateKeyPath] = useState('') 
     const [privateKeyContent, setPrivateKeyContent] = useState('')  
     const dialog = useDialog();
-
+ 
     useEffect(() => { 
         const handler = uiEventDispatcher.listen('select-file-result', (files)=>{
             console.log(files); 

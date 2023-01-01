@@ -13,6 +13,7 @@ const SSHProxy = require('./SSHProxy');
 
 const DATA_FILE_PATH = path.join(__dirname , 'config.json')
 
+let selectedServer = null;
 let sshProxy = null;
 let allServers = [];
 if(fs.existsSync(DATA_FILE_PATH)){
@@ -92,10 +93,13 @@ ipcMain.on('ssh-disconnect', async (event, server) => {
   event.reply('ssh-disconnect') 
   
 })
+ipcMain.on('ssh-connection', async (event, server) => {  
+  event.reply('ssh-connection', { server : selectedServer, status : sshProxy.status})  
+})
 
 ipcMain.on('connect-server', async (event, server) => { 
   console.log('connect-server', server);    
-  const selectedServer = allServers.find( s => s.time === server.time)
+  selectedServer = allServers.find( s => s.time === server.time)
    
   const ssh = {
     host: selectedServer.host,

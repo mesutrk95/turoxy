@@ -26,7 +26,7 @@ function App() {
       connHandler.unregister()
       disHandler.unregister()
     }
-  }, [])
+  }, [uiEvents.time])
 
   return (
     <div className={styles.App}> 
