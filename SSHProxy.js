@@ -54,14 +54,15 @@ class SSHProxy extends EventEmitter{
                 lastStats = { sent : this.stats.sent, received: this.stats.received }
             }else{
                 const dt = now - lastCheckedNetworkSpeed;
-                if(dt > 1000){
+                // if(dt > 1000){
                     const diffDownload = this.stats.received - lastStats.received
                     const diffUpload = this.stats.sent - lastStats.sent 
                     lastStats = { sent : this.stats.sent, received: this.stats.received }
                     lastCheckedNetworkSpeed = now;
                     this.stats.speed.download = 1000 * diffDownload / dt;
                     this.stats.speed.upload = 1000 * diffUpload / dt; 
-                }
+                    this.stats.speed.time = now; 
+                // }
             }
 
             
