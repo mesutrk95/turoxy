@@ -4,19 +4,21 @@ const httpProxy = require('http-proxy');
 const net = require('net');
 const http = require('http');
 const url = require('url');
+const { EventEmitter } = require('stream');
  
 
-class HttpProxyServer {
+class HttpProxyServer extends EventEmitter {
 
     onRequest;
     listening = false;
 
     constructor(config){
+        super();
         this.config = config;
     }
 
     get status()  { 
-        return 'sssss'
+        return this.listening ? 'started' : 'not-started'
     } 
 
     // async createSocket(){
@@ -78,6 +80,7 @@ class HttpProxyServer {
             
             this.proxy.listen(this.config.port , () => {
                 console.log(`http proxy server listening to: ${this.config.port}`);
+                this.listening = true;
                 resolve();
             });
         })

@@ -8,11 +8,19 @@ import MainPage from './pages/MainPage';
 
 import uiEvents from './ui-event-dispatcher'
 
+
 function App() {
   const [page, setPage] = useState('main')
 
-  useEffect(()=>{
+  useEffect(()=>{  
+    
+    const exceptionHandler = uiEvents.listen('node-exception', ex => { 
+      console.log('uncaught-exception', ex);
+    })
 
+    const logHandler = uiEvents.listen('node-log', log => { 
+      console.log('node-log', ...log);
+    })
     const connHandler = uiEvents.listen('ssh-connection', (conn) => {
       setPage('ssh-connection')
       console.log('ssh-connection', conn);
@@ -21,10 +29,16 @@ function App() {
     const disHandler = uiEvents.listen('ssh-disconnect', ( ) => {
       setPage('main')
       console.log('ssh-disconnect');
-    })
-    return ()=>{
+    }) 
+
+    uiEvents.send('node-exception-reg')
+    uiEvents.send('node-log-reg')
+
+    return ()=>{ 
       connHandler.unregister()
       disHandler.unregister()
+      exceptionHandler.unregister()
+      logHandler.unregister() 
     }
   }, [uiEvents.time])
 

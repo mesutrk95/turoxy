@@ -16,6 +16,9 @@ import {
   } from 'chart.js';
 import { Line } from 'react-chartjs-2'; 
 
+import {CodespacesIcon, DeviceDesktopIcon, GlobeIcon,
+        DesktopDownloadIcon, UploadIcon, PackageDependenciesIcon, PackageDependentsIcon, DownloadIcon} from '@primer/octicons-react'
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -26,8 +29,9 @@ ChartJS.register(
     Legend
 );
   
-export const options = {
-  responsive: true,
+export const options = { 
+  responsive: false,
+  maintainAspectRatio: false,
   showTooltips: false,
   animation: {
     duration: 0,
@@ -43,6 +47,7 @@ export const options = {
     },
     y: {
       beginAtZero: true,
+      display: false,
       grid: {
         display: false,
       },
@@ -50,9 +55,9 @@ export const options = {
           // Include a dollar sign in the ticks
           callback: function(value, index, ticks) {
               if(value > MEGABYTE){
-                  return (value / MEGABYTE).toFixed(2)  + ' Mbps'
+                  return (value / MEGABYTE).toFixed(1)  + ' Mbps'
               }else if(value > KILOBYTE){
-                return (value / KILOBYTE).toFixed(1) + ' Kbps'
+                return (value / KILOBYTE).toFixed(0) + ' Kbps'
               }else {
                 return value + ' Bps'
               }
@@ -62,7 +67,7 @@ export const options = {
   },
   plugins: {
     legend: {
-      display: true,
+      display: false,
       position: "bottom",
     },
     title: {
@@ -93,8 +98,8 @@ function autoSpeedSizeAdjust(amount){
 }
 
 let DEFAULT_SIZE = 20;
-let networkTicks = [];
-for (let index = 0; index < DEFAULT_SIZE; index++) {
+let networkTicks = []; 
+while (networkTicks.length < DEFAULT_SIZE) {
     networkTicks.push({upload :0, download : 0})
 }
 
@@ -180,45 +185,102 @@ export default function ConnectionStatus(props) {
         uiEvent.send('ssh-disconnect');
     }
 
+    function getSSHConnectionClass(){ 
+        if(conn && conn.status){
+            if(conn.status.ssh == "failed") return 'text-danger'
+            
+            return  conn.status.ssh == 'connected' ? 'text-success': 'text-warning'
+        }else{
+            return 'text-danger'
+        }
+    }
+    function getProxyServerClass(){
+        if(conn && conn.status) {
+            return  conn.status.http == 'started' ? 'text-success': 'text-warning'
+        }else{
+            return 'text-danger'
+        }
+    }
+
     return (
-        <div className={`${styles.addServer} p-3`}>  
+        <div className={`${styles.connectionStatus} p-3`}>  
             <h3 className="mb-4">Connection Status</h3>   
-            {
-                conn && conn.server && 
-                <div>
-                    <h5>Server : {conn.server.host}:{conn.server.port}</h5>  
+            <div className='row mt-5 mb-2 px-2 '>
+                <div className={`${styles.border } col d-flex justify-content-start ${getProxyServerClass()}`}> 
+                    <div className={styles.minWidthHost}> 
+                        <DeviceDesktopIcon size={40}></DeviceDesktopIcon>
+                        <div className='mt-1'>
+                            <h6 className='fw-thin '>Your <br/> Device</h6>  
+                        </div>
+                    </div>
+                    <span className={styles.right}></span>
                 </div>
-            }
-            {
-                conn && conn.status && 
-                <div> 
-                    <h5>SSH Connection : {conn.status.ssh}</h5> 
-                    <h5>Socks Server : {conn.status.socks}</h5>
+                <div className='col-auto px-0 '> 
+                    <GlobeIcon size={40}></GlobeIcon>
+                        <div className='mt-1'>
+                            <h6 className='fw-thin '>Internet</h6>  
+                        </div>
                 </div>
-            } 
-            <Line ref={(reference) => setChartReference(reference) }  
-                    options={options} data={chartData} style={{ width: '100%', height: '300px'}} 
-                    className="my-3" /> 
+                <div className={`${styles.border } col d-flex justify-content-end  ` + 
+                    `${getSSHConnectionClass()}`}>
+                    <span className={styles.left}></span>
+                    <div className={styles.minWidthHost}>
+                        <CodespacesIcon size={40}></CodespacesIcon>
+                        {
+                            conn && conn.server && 
+                            <div className='mt-1'> 
+                                <h6 className='fw-thin'>{conn.server.host}<br/>SSH Server</h6>  
+                            </div>
+                        } 
+
+                    </div>
+                </div>
+            </div>
+             <div className='w-100 d-flex justify-content-center mb-5 mt-5'>
+                <div className='' style={{ width : '100%' }}> 
+                    <Line ref={(reference) => setChartReference(reference) }  
+                            options={options} data={chartData}  
+                            className="mx-auto" height={50}/> 
+                </div>
+                
+             </div>
             {
                 stats && 
                 <div>
                     <div className='row mt-4'>
-                        <div className='col'><h6>Total Sent<br/>{stats.sent[0]} {stats.sent[1]}</h6></div>
-                        <div className='col'><h6>Total Received<br/>{stats.received[0]} {stats.received[1]}</h6></div>
+                        <div className='col'>
+                            <DownloadIcon className='mb-2' size={18} />
+                            <h6 className='m-0'>Download</h6>
+                            <span className='text-muted'>{stats.downloadSpeed[0]} {stats.downloadSpeed[1]}</span>   
+                        </div> 
+                        <div className='col'>
+                            <UploadIcon className='mb-2' size={18} />
+                            <h6 className='m-0'>Upload</h6>
+                            <span className='text-muted'>{stats.uploadSpeed[0]} {stats.uploadSpeed[1]}</span>   
+                        </div>
                     </div>
                     <div className='row mt-4'>
-                        <div className='col'><h6>Upload<br/> {stats.uploadSpeed[0]} {stats.uploadSpeed[1]}</h6></div>
-                        <div className='col'><h6>Download<br/> {stats.downloadSpeed[0]} {stats.downloadSpeed[1]}</h6></div>
+                        <div className='col'>
+                            <PackageDependenciesIcon className='mb-2' size={18} />
+                            <h6 className='m-0'>Total Received</h6>
+                            <span className='text-muted'>{stats.received[0]} {stats.received[1]}</span> 
+                        </div>
+                        <div className='col'>
+                            <PackageDependentsIcon className='mb-2' size={18} />
+                            <h6 className='m-0'>
+                                Total Sent 
+                            </h6>
+                            <span className='text-muted'>{stats.sent[0]} {stats.sent[1]}</span>
+                        </div>
                     </div>
                 </div>
             }
-            
-
-            <div className='row mt-4'>
+            <div className='row mt-5'>
                 <div>
-                    <span className='btn btn-danger' onClick={e=> disconnect()}>Disconnect</span>
+                    <span className='btn btn-danger w-100 py-3' onClick={e=> disconnect()}>Disconnect</span>
                 </div>
             </div>
+             
         </div>
     )
 }

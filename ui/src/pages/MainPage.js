@@ -13,6 +13,7 @@ export default function MainPage(props) {
         uiEvent.send('get-all-servers');
         
         const handler = uiEvent.listen('all-servers', (data)=>{
+            console.log('all-servers', data);
             setServers(data) 
         })
 

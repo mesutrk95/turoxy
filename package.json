@@ -3,11 +3,24 @@
   "version": "1.0.0",
   "description": "ssh tunnel proxy application",
   "authors": "rapiddev",
-  "main": "index.js",
+  "main": "src/index.js",
+  "build": {
+    "files": [
+      "ui/build/**/*",
+      "node_modules/**/*",
+      "src/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "repo": "electron-cra-example",
+      "owner": "devil"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron-forge start",
-    "package": "electron-forge package",
+    "package1": "electron-forge package",
+    "package":"npm run build --prefix ui && electron-builder build --win -c.extraMetadata.main=src/index.js --publish never",
     "make": "npm run build --prefix ui && electron-forge make",
     "dev": "concurrently -k \"cd ui && npm start\" \"npm:electron\"",
     "electron": "wait-on tcp:25489 && electron .",
@@ -23,10 +36,10 @@
     "@electron-forge/maker-zip": "^6.0.4",
     "concurrently": "^7.6.0",
     "electron": "^22.0.0",
-    "electron-is-dev": "^2.0.0",
     "wait-on": "^7.0.1"
   },
   "dependencies": {
+    "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "global-tunnel-ng": "^2.7.1",
     "http-proxy": "^1.18.1",

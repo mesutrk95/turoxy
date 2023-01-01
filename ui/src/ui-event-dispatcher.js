@@ -44,7 +44,7 @@ class UIEventDispatcher {
 
         return { 
             unregister : ()=>{
-                chnl.splice(callback, 1);
+                chnl.splice(chnl.indexOf(callback), 1);
             }
         }
 

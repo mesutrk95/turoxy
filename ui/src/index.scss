@@ -1,5 +1,8 @@
 
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'scss/theme2/variables';
+
+@import 'bootstrap/scss/bootstrap';
+@import 'scss/theme2/bootswatch';
 
 @font-face {
   font-family: 'Changa';

@@ -3,12 +3,15 @@ const { readFileSync } = require('fs');
 const regedit = require('regedit').promisified 
 const http = require('http');
 const url = require('url');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
 const SSH2 = require('ssh2')
 const SSHClient = require('./SSHClient')
 const SocksProxyServer = require('./SocksProxyServer')
 const HttpProxyServer = require('./HttpProxyServer')
 const EventEmitter = require('events');
+const { log } = require('./log');
 
 class SSHProxy extends EventEmitter{
 
@@ -31,9 +34,9 @@ class SSHProxy extends EventEmitter{
 
     get status()  {
         return { 
-            ssh : this.sshClient ? this.sshClient.status : 'not-inited', 
-            socks: this.socksProxy  ? this.socksProxy.status : 'not-inited',
-            http: this.http  ? this.httpProxy.status : 'not-inited' 
+            ssh : this.sshClient ? this.sshClient.status : 'not-started', 
+            socks: this.socksProxy  ? this.socksProxy.status : 'not-started',
+            http: this.httpProxy  ? this.httpProxy.status : 'not-started' 
         }
     } 
     
@@ -89,8 +92,7 @@ class SSHProxy extends EventEmitter{
             this.httpProxy = new HttpProxyServer(this.config.httpProxy);
             this.httpProxy.onRequest = this.handleHttpRequest
             this.httpProxy.onOptionsRequest = this.handleHttpOptionsRequest
-            await this.httpProxy.start();  
-             
+            await this.httpProxy.start();   
         }
 
         
@@ -100,7 +102,7 @@ class SSHProxy extends EventEmitter{
     handleHttpOptionsRequest = (clientReq, clientRes) => {
         
         let reqUrl = url.parse(clientReq.url);
-        console.log('options proxy for http request: ' + reqUrl.href);
+        log('options proxy for http request: ' + reqUrl.href);
       
         let options = {
             host: reqUrl.hostname,
@@ -118,24 +120,24 @@ class SSHProxy extends EventEmitter{
         clientReq.pipe(serverConnection);
 
         clientReq.on('error', (e) => {
-            console.log('client socket error: ' + e);
+            log('client socket error: ' + e);
         });
       
         serverConnection.on('error', (e) => {
-            console.log('server connection error: ' + e);
+            log('server connection error: ' + e);
         }); 
     }
 
     handleHttpRequest = (info, accept, deny) => {
-        console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
+        log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
         
         this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
             (err, resultStream) => {
                 
-                console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
+                log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
 
                 if (err) { 
-                    console.log('error exception', err);
+                    log('error exception', err);
                     return deny();
                     // return;
                 } 
@@ -158,17 +160,10 @@ class SSHProxy extends EventEmitter{
                            this.stats.received += data.length  
                         });
                         clientSocket.on('close', data => {    
-                        //    console.log('closssssssssssssssssssssssssssssssssssssse'); 
-                        });  
-
-                        // resultStream
-                        //     .pipe(clientSocket)
-                        //     .pipe(resultStream)
-                        //          .on('error', () => { 
-                        //              console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
-                        //          })   
+                        //    log('closssssssssssssssssssssssssssssssssssssse'); 
+                        });   
                     } catch (ex) {
-                        console.log('exception', ex);
+                        log('exception', ex);
                     }
                 } else {   
                 } 
@@ -177,15 +172,15 @@ class SSHProxy extends EventEmitter{
     }
     
     handleSocksRequest = (info, accept, deny)=>{ 
-        console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
+        log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
         
         this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
             (err, resultStream) => {
                 
-                console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
+                log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
 
                 if (err) { 
-                    console.log('error exception', err);
+                    log('error exception', err);
                     return deny();
                     // return;
                 } 
@@ -196,14 +191,14 @@ class SSHProxy extends EventEmitter{
                     try {  
                         clientSocket.on('data', data => {  
                             this.stats.sent += data.length
-                        //    console.log(this.stats, data.length);
+                        //    log(this.stats, data.length);
                         });
                         resultStream.on('data', data => {   
                             this.stats.received += data.length 
-                        //    console.log(this.stats, data.length);
+                        //    log(this.stats, data.length);
                         });
                         clientSocket.on('close', data => {    
-                        //    console.log('closssssssssssssssssssssssssssssssssssssse');
+                        //    log('closssssssssssssssssssssssssssssssssssssse');
                             this.openSockets.delete(info.srcPort)
                         });  
 
@@ -211,10 +206,10 @@ class SSHProxy extends EventEmitter{
                             .pipe(clientSocket)
                             .pipe(resultStream)
                                     .on('error', () => { 
-                                        console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
+                                        log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
                                     })   
                     } catch (ex) {
-                        console.log('exception', ex);
+                        log('exception', ex);
                     }
                 } else { 
 
@@ -225,37 +220,40 @@ class SSHProxy extends EventEmitter{
     async stop(){
         clearInterval(this.statesIntervalHandler)
 
-        console.log(`socks open sockets: ${this.openSockets.size}`);
+        log(`socks open sockets: ${this.openSockets.size}`);
         this.openSockets.forEach((socket,key,map) => {
-            console.log(`closing socket ${key}...`);
+            log(`closing socket ${key}...`);
             socket.end()
         })
         this.openSockets.clear();
 
-        console.log('stopping socks proxy server ...');
+        log('stopping socks proxy server ...');
         if(this.socksProxy) await this.socksProxy.stop()
 
-        console.log('stopping http proxy server ...');
+        log('stopping http proxy server ...');
         if(this.httpProxy) await this.httpProxy.stop()
         
-        console.log('disconnecting ssh client ...');
+        log('disconnecting ssh client ...');
         if(this.sshClient) this.sshClient.stop();
 
-        console.log('clearing system proxy ...');
+        log('clearing system proxy ...');
         await this.disableSystemProxy(); 
-        console.log('done.');
+        log('done.');
     }
 
     async disableSystemProxy(){ 
-        console.log('setting registry keys.');
-        await regedit.putValue({
-            'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-                ProxyEnable: { value: 0, type: 'REG_DWORD' }
-            }
-        })
+        log('setting registry keys.');
+        // await regedit.putValue({
+        //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
+        //         ProxyEnable: { value: 0, type: 'REG_DWORD' }
+        //     }
+        // })
+        
+        await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f')
+
     }
     async enableSystemProxy(){ 
-        console.log('setting registry keys.');
+        log('setting registry keys.');
 
         let proxyUrl = '';
         if(this.config.httpProxy){
@@ -263,37 +261,28 @@ class SSHProxy extends EventEmitter{
         } else if(this.config.socksProxy) {
             proxyUrl = 'socks=' + this.config.socks.host + ':' + this.config.socks.port
         }
+        let proxyOverride = 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*';
 
-        await regedit.putValue({
-            'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-                ProxyServer: {
-                    value: proxyUrl, type: 'REG_SZ'
-                },
-                ProxyOverride: {
-                    value: 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*',
-                    type: 'REG_SZ'
-                }
-            }
-        })
-        await regedit.putValue({
-            'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-                ProxyEnable: { value: 1, type: 'REG_DWORD' }
-            }
-        })
-
-
-        // GlobalProxy.setConfig({
-        //     http: `http://socks=${socksServer.host}:${socksServer.port}`,
-        // // https: "https://localhost:1080",
-        // });
-        // GlobalProxy.start();
-
-        // globalTunnel.initialize({
-        //     host:  `socks=${socksServer.host}`,
-        //     port: socksServer.port,
-        //     // proxyAuth: 'userId:password', // optional authentication
-        //     sockets: 50 // optional pool size for each http and https
-        //   });
+        // await regedit.putValue({
+        //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
+        //         ProxyServer: {
+        //             value: proxyUrl, type: 'REG_SZ'
+        //         },
+        //         ProxyOverride: {
+        //             value: 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*',
+        //             type: 'REG_SZ'
+        //         }
+        //     }
+        // })
+        // await regedit.putValue({
+        //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
+        //         ProxyEnable: { value: 1, type: 'REG_DWORD' }
+        //     }
+        // })
+        await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f')
+        await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d ${proxyUrl} /f`)
+        await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d ${proxyOverride} /f`)
+ 
     } 
     
 } 
