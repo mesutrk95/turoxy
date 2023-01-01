@@ -114,9 +114,13 @@ ipcMain.on('connect-server', async (event, server) => {
     ssh.password = selectedServer.auth.password  
   }
 
-  const socks  = {
+  const socksProxy  = {
     host: '127.0.0.1',
     port: 54612
+  }
+  const httpProxy  = {
+    host: '127.0.0.1',
+    port: 54610
   }
 
   if(sshProxy){
@@ -124,7 +128,7 @@ ipcMain.on('connect-server', async (event, server) => {
     sshProxy = null;
   }
 
-  sshProxy = new SSHProxy({ ssh, socks })
+  sshProxy = new SSHProxy({ ssh, socksProxy, httpProxy })
   sshProxy.start()
 
   sshProxy.on('status', (status)=>{

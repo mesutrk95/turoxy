@@ -1,6 +1,6 @@
 const socks = require('socksv5');
 
-class SocksServer {
+class SocksProxyServer {
 
     onRequest;
     listening = false;
@@ -45,4 +45,4 @@ class SocksServer {
     }
 }
 
-module.exports = SocksServer;
+module.exports = SocksProxyServer;
