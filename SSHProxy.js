@@ -1,9 +1,10 @@
 
 const { readFileSync } = require('fs');
-const regedit = require('regedit').promisified
-// const GlobalProxy = require("node-global-proxy").default;
-// const globalTunnel = require('global-tunnel-ng');
- 
+const regedit = require('regedit').promisified 
+const http = require('http');
+const url = require('url');
+
+const SSH2 = require('ssh2')
 const SSHClient = require('./SSHClient')
 const SocksProxyServer = require('./SocksProxyServer')
 const HttpProxyServer = require('./HttpProxyServer')
@@ -15,8 +16,12 @@ class SSHProxy extends EventEmitter{
 
     statesIntervalHandler
     stats = {
-        send: 0,
-        receive: 0
+        sent: 0,
+        received: 0,
+        speed: {
+            download : 0,
+            upload: 0,
+        }
     }
 
     constructor(config){
@@ -39,12 +44,32 @@ class SSHProxy extends EventEmitter{
 
     async start(){  
 
+        let lastCheckedNetworkSpeed = -1, lastStats ;
         clearInterval(this.statesIntervalHandler)
         this.statesIntervalHandler = setInterval(() => {
-            this.emit("stats", this.stats ); 
+            const now = new Date().getTime();
+
+            if(lastCheckedNetworkSpeed < 0){
+                lastCheckedNetworkSpeed = now;
+                lastStats = { sent : this.stats.sent, received: this.stats.received }
+            }else{
+                const dt = now - lastCheckedNetworkSpeed;
+                if(dt > 1000){
+                    const diffDownload = this.stats.received - lastStats.received
+                    const diffUpload = this.stats.sent - lastStats.sent 
+                    lastStats = { sent : this.stats.sent, received: this.stats.received }
+                    lastCheckedNetworkSpeed = now;
+                    this.stats.speed.download = 1000 * diffDownload / dt;
+                    this.stats.speed.upload = 1000 * diffUpload / dt; 
+                }
+            }
+
+            
+            this.emit("stats", this.stats); 
         }, 500); 
 
         this.emitStatus();
+        this.httpAgent = new SSH2.HTTPAgent(this.config.ssh);
         this.sshClient = new SSHClient(this.config.ssh);
         this.sshClient.on('status', (status) =>{
             this.emitStatus();
@@ -54,119 +79,148 @@ class SSHProxy extends EventEmitter{
         if(this.config.socksProxy){
             this.emitStatus(); 
             this.socksProxy = new SocksProxyServer(this.config.socksProxy);
-            await this.socksProxy.start();  
+            this.socksProxy.onRequest = this.handleSocksRequest
+            await this.socksProxy.start();   
         }
         
         if(this.config.httpProxy){
             this.emitStatus();
             this.httpProxy = new HttpProxyServer(this.config.httpProxy);
+            this.httpProxy.onRequest = this.handleHttpRequest
+            this.httpProxy.onOptionsRequest = this.handleHttpOptionsRequest
             await this.httpProxy.start();  
+             
         }
 
         
         this.emitStatus();
-        await this.enableSystemProxy(); 
+        await this.enableSystemProxy();   
+    }
+    handleHttpOptionsRequest = (clientReq, clientRes) => {
+        
+        let reqUrl = url.parse(clientReq.url);
+        console.log('options proxy for http request: ' + reqUrl.href);
+      
+        let options = {
+            host: reqUrl.hostname,
+            port: reqUrl.port,
+            path: reqUrl.path,
+            method: clientReq.method,
+            headers: clientReq.headers,
+            agent: this.httpAgent
+        };
 
-        this.httpProxy.onRequest = (info, accept, deny) => {
-            console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-            
-            this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
-                (err, resultStream) => {
-                    
-                    console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
-    
-                    if (err) { 
-                        console.log('error exception', err);
-                        return deny();
-                        // return;
-                    } 
-                    const { clientSocket, clientRequest, head} = accept(true);
-                    clientSocket.write('HTTP/' + clientRequest.httpVersion + ' 200 Connection Established\r\n' +
-                        'Proxy-agent: Node.js-Proxy\r\n' +
-                            '\r\n', 'UTF-8', () => {
-                        // creating pipes in both ends
-                        resultStream.write(head);
-                        resultStream.pipe(clientSocket);
-                        clientSocket.pipe(resultStream);
-                    });
-                    this.openSockets.set(info.srcPort, clientSocket);
+        let serverConnection = http.request(options, (res) => {
+            clientRes.writeHead(res.statusCode, res.headers)
+            res.pipe(clientRes); 
+        });
+        clientReq.pipe(serverConnection);
 
-                    if (clientSocket) { 
-                        try {  
-                            clientSocket.on('data', data => {  
-                               this.stats.send += data.length 
-                            });
-                            resultStream.on('data', data => {   
-                               this.stats.receive += data.length  
-                            });
-                            clientSocket.on('close', data => {    
-                            //    console.log('closssssssssssssssssssssssssssssssssssssse');
-                               this.openSockets.delete(info.srcPort)
-                            });  
+        clientReq.on('error', (e) => {
+            console.log('client socket error: ' + e);
+        });
+      
+        serverConnection.on('error', (e) => {
+            console.log('server connection error: ' + e);
+        }); 
+    }
 
-                            // resultStream
-                            //     .pipe(clientSocket)
-                            //     .pipe(resultStream)
-                            //          .on('error', () => { 
-                            //              console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
-                            //          })   
-                        } catch (ex) {
-                            console.log('exception', ex);
-                        }
-                    } else { 
-    
-                    } 
-            }); 
+    handleHttpRequest = (info, accept, deny) => {
+        console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
+        
+        this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
+            (err, resultStream) => {
+                
+                console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
 
-        }
+                if (err) { 
+                    console.log('error exception', err);
+                    return deny();
+                    // return;
+                } 
+                const { clientSocket, clientRequest, head} = accept(true);
+                clientSocket.write('HTTP/' + clientRequest.httpVersion + ' 200 Connection Established\r\n' +
+                    'Proxy-agent: Node.js-Proxy\r\n' +
+                        '\r\n', 'UTF-8', () => {
+                    // creating pipes in both ends
+                    resultStream.write(head);
+                    resultStream.pipe(clientSocket);
+                    clientSocket.pipe(resultStream);
+                }); 
 
-        this.socksProxy.onRequest = (info, accept, deny) => {
-            console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-            
-            this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
-                (err, resultStream) => {
-                    
-                    console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
-    
-                    if (err) { 
-                        console.log('error exception', err);
-                        return deny();
-                        // return;
-                    } 
-                    const clientSocket = accept(true);
-                    this.openSockets.set(info.srcPort, clientSocket);
+                if (clientSocket) { 
+                    try {  
+                        clientSocket.on('data', data => {  
+                           this.stats.sent += data.length 
+                        });
+                        resultStream.on('data', data => {   
+                           this.stats.received += data.length  
+                        });
+                        clientSocket.on('close', data => {    
+                        //    console.log('closssssssssssssssssssssssssssssssssssssse'); 
+                        });  
 
-                    if (clientSocket) { 
-                        try {  
-                            clientSocket.on('data', data => {  
-                               this.stats.send += data.length
-                            //    console.log(this.stats, data.length);
-                            });
-                            resultStream.on('data', data => {   
-                               this.stats.receive += data.length 
-                            //    console.log(this.stats, data.length);
-                            });
-                            clientSocket.on('close', data => {    
-                            //    console.log('closssssssssssssssssssssssssssssssssssssse');
-                               this.openSockets.delete(info.srcPort)
-                            });  
+                        // resultStream
+                        //     .pipe(clientSocket)
+                        //     .pipe(resultStream)
+                        //          .on('error', () => { 
+                        //              console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
+                        //          })   
+                    } catch (ex) {
+                        console.log('exception', ex);
+                    }
+                } else {   
+                } 
+        }); 
 
-                            resultStream
-                                .pipe(clientSocket)
-                                .pipe(resultStream)
-                                     .on('error', () => { 
-                                         console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
-                                     })   
-                        } catch (ex) {
-                            console.log('exception', ex);
-                        }
-                    } else { 
-    
-                    } 
-            }); 
-        }
     }
     
+    handleSocksRequest = (info, accept, deny)=>{ 
+        console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
+        
+        this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
+            (err, resultStream) => {
+                
+                console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
+
+                if (err) { 
+                    console.log('error exception', err);
+                    return deny();
+                    // return;
+                } 
+                const clientSocket = accept(true);
+                this.openSockets.set(info.srcPort, clientSocket);
+
+                if (clientSocket) { 
+                    try {  
+                        clientSocket.on('data', data => {  
+                            this.stats.sent += data.length
+                        //    console.log(this.stats, data.length);
+                        });
+                        resultStream.on('data', data => {   
+                            this.stats.received += data.length 
+                        //    console.log(this.stats, data.length);
+                        });
+                        clientSocket.on('close', data => {    
+                        //    console.log('closssssssssssssssssssssssssssssssssssssse');
+                            this.openSockets.delete(info.srcPort)
+                        });  
+
+                        resultStream
+                            .pipe(clientSocket)
+                            .pipe(resultStream)
+                                    .on('error', () => { 
+                                        console.log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
+                                    })   
+                    } catch (ex) {
+                        console.log('exception', ex);
+                    }
+                } else { 
+
+                } 
+        });  
+    }
+
     async stop(){
         clearInterval(this.statesIntervalHandler)
 
@@ -205,7 +259,7 @@ class SSHProxy extends EventEmitter{
         let proxyUrl = '';
         if(this.config.httpProxy){
             proxyUrl = this.config.httpProxy.host + ':' + this.config.httpProxy.port
-        }else if(this.config.socksProxy){
+        } else if(this.config.socksProxy) {
             proxyUrl = 'socks=' + this.config.socks.host + ':' + this.config.socks.port
         }
 

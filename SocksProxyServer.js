@@ -32,7 +32,10 @@ class SocksProxyServer {
 
     start() {
         return new Promise((resolve, reject) => {
-            this.socksServer = socks.createServer((info, accept, deny) => this.onRequest(info, accept, deny))
+            this.socksServer = socks.createServer((info, accept, deny) => { 
+                if(this.onRequest) this.onRequest(info, accept, deny)
+                else deny()
+            })
             this.socksServer.on('error', err => {
                 console.log('error', err);
             })

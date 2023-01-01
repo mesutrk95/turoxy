@@ -41,7 +41,11 @@ class HttpProxyServer {
         return new Promise((resolve, reject) => {
             // this.proxy = httpProxy.createProxyServer(options); 
             
-            this.proxy = http.createServer((req, res) => this.httpOptions(req, res));
+            this.proxy = http.createServer((req, res) => 
+            {
+                if(this.onOptionsRequest) this.onOptionsRequest(req, res)
+                // this.httpOptions(req, res)
+            });
             
             // handle https proxy requests (CONNECT method)
             this.proxy.on('connect', async (clientRequest, clientSocket, head) => {
@@ -50,8 +54,7 @@ class HttpProxyServer {
 
                     let reqUrl = url.parse('https://' + clientRequest.url);   
 
-                    function accept(intercept){  
-                        
+                    function accept(intercept){   
                         return { clientSocket, head, clientRequest };
                     }
                     async function deny(){  
@@ -64,65 +67,8 @@ class HttpProxyServer {
                             dstAddr: reqUrl.host.split(':')[0], 
                             dstPort: reqUrl.port, 
                         }, accept, deny )
-                    
-                    // const startTime = new Date().getTime();
-                    // const socket = await this.createSocket()
-                    // console.log('new socket in ', (new Date().getTime() - startTime) + 'ms, ', socket.address().port);
-
-                    // function accept(){ 
-                    //     socket.on('data', data => {
-                    //         console.log(data);
-                    //     }).on('close' , ()=>{
-                    //         console.log('close');
-                    //     })
-                    //     return socket;
-                    // }
-                    // async function deny(){ 
-                    //     socket.end();
-                    //     clientSocket.end()
-                    // }
-                    // let reqUrl = url.parse('https://' + clientReq.url);  
-                    // this.onRequest(
-                    //     { 
-                    //         srcAddr: socket.address().address, 
-                    //         srcPort: socket.address().port.toString(), 
-                    //         dstAddr: reqUrl.host.split(':')[0], 
-                    //         dstPort: reqUrl.port, 
-                    //     }, 
-                    //     accept, deny)
-                }
-                return;
-
-                let reqUrl = url.parse('https://' + clientRequest.url);
-                console.log('proxy for https request: ' + reqUrl.href + '(path encrypted by ssl)');
-            
-                let options = {
-                    port: reqUrl.port,
-                    host: reqUrl.hostname
-                };
-
-            
-                // create socket connection for client, then pipe (redirect) it to client socket
-                let serverSocket = net.connect(options, () => {
-                    clientSocket.write('HTTP/' + clientReq.httpVersion + ' 200 Connection Established\r\n' +
-                                'Proxy-agent: Node.js-Proxy\r\n' +
-                                '\r\n', 'UTF-8', () => {
-                    // creating pipes in both ends
-                    serverSocket.write(head);
-                    serverSocket.pipe(clientSocket);
-                    clientSocket.pipe(serverSocket);
-                });
-                });
-            
-                clientSocket.on('error', (e) => {
-                    console.log("client socket error: " + e);
-                    serverSocket.end();
-                });
-            
-                serverSocket.on('error', (e) => {
-                    console.log("forward proxy server connection error: " + e);
-                    clientSocket.end();
-                });
+                     
+                } 
             });
             
             this.proxy.on('clientError', (err, clientSocket) => {
@@ -138,16 +84,17 @@ class HttpProxyServer {
     } 
 
     httpOptions(clientReq, clientRes) { 
-        
+  
+
         let reqUrl = url.parse(clientReq.url);
-        // console.log('options proxy for http request: ' + reqUrl.href);
+        console.log('options proxy for http request: ' + reqUrl.href);
       
         let options = {
-          hostname: reqUrl.hostname,
-          port: reqUrl.port,
-          path: reqUrl.path,
-          method: clientReq.method,
-          headers: clientReq.headers
+            hostname: reqUrl.hostname,
+            port: reqUrl.port,
+            path: reqUrl.path,
+            method: clientReq.method,
+            headers: clientReq.headers
         };
       
         // create socket connection on behalf of client, then pipe the response to client response (pass it on)
