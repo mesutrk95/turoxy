@@ -10,6 +10,8 @@ const EventEmitter = require('events');
 
 class SSHProxy extends EventEmitter{
 
+    openSockets = new Map();
+
     statesIntervalHandler
     stats = {
         send: 0,
@@ -56,10 +58,10 @@ class SSHProxy extends EventEmitter{
 
         this.socks.onRequest = (info, accept, deny) => {
             console.log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-    
+            
             this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
                 (err, resultStream) => {
-    
+                    
                     console.log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
     
                     if (err) { 
@@ -68,6 +70,8 @@ class SSHProxy extends EventEmitter{
                         // return;
                     } 
                     const clientSocket = accept(true);
+                    this.openSockets.set(info.srcPort, clientSocket);
+
                     if (clientSocket) { 
                         try {  
                             clientSocket.on('data', data => {  
@@ -78,6 +82,14 @@ class SSHProxy extends EventEmitter{
                                this.stats.receive += data.length 
                             //    console.log(this.stats, data.length);
                             });
+                            clientSocket.on('close', data => {    
+                            //    console.log('closssssssssssssssssssssssssssssssssssssse');
+                               this.openSockets.delete(info.srcPort)
+                            });
+                            // clientSocket.on('end', data => {    
+                            //    console.log('ennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnd');
+                            //    this.openSockets.delete(info.srcPort)
+                            // });
                             
 
                             resultStream
@@ -98,10 +110,20 @@ class SSHProxy extends EventEmitter{
     
     async stop(){
         clearInterval(this.statesIntervalHandler)
-        console.log('disconnecting ssh client ...');
-        if(this.sshClient) this.sshClient.stop();
+
+        console.log(`socks open sockets: ${this.openSockets.size}`);
+        this.openSockets.forEach((socket,key,map) => {
+            console.log(`closing socket ${key}...`);
+            socket.end()
+        })
+        this.openSockets.clear();
+
         console.log('stopping socks server ...');
         if(this.socks) await this.socks.stop()
+        
+        console.log('disconnecting ssh client ...');
+        if(this.sshClient) this.sshClient.stop();
+
         console.log('clearing system proxy ...');
         await this.disableSystemProxy(); 
         console.log('done.');

@@ -143,6 +143,7 @@ const createWindow = () => {
     width: 400,
     height: 650,
     // autoHideMenuBar: true,
+    frame: true,
     title: 'SSH Tunnel Proxy',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
