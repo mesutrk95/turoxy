@@ -158,7 +158,7 @@ function registerEvents(){
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 430,
+    width: 400,
     height: 700,
     autoHideMenuBar: true,
     // frame: true,

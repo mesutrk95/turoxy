@@ -60,19 +60,21 @@ export default function ConnectionStatus(props) {
         uiEvent.send('ssh-disconnect');
     } 
     return (
-        <div className={`${styles.connectionStatus} p-3`}>  
+        <div className={`${styles.connectionStatus} py-3`}>  
             <h6 className="mb-0">Connection Status</h6>   
             
             {
                 conn && conn.server && <h3 className="mb-2">{ conn.server.label }</h3>
             }
              
-            <div className='row mt-0 px-2 '>
-
-                <NetworkViewer connection={conn} /> 
-            </div>
-            <div className='w-100 d-flex justify-content-center mb-5 mt-1'>
+            <div className='w-100 d-flex justify-content-center mt-1'>
                 <NetworkStatsChart />
+            </div>
+            <div className='row mt-3 px-2 '>
+                <div className="mx-auto " style={{ width : '85%'}}>
+                    <NetworkViewer connection={conn} />  
+                </div>
+
             </div>
             {
                 stats && 
@@ -105,7 +107,7 @@ export default function ConnectionStatus(props) {
                     </div>
                 </div>
             }
-            <div className='row mt-5'>
+            <div className='row mt-5 px-3'>
                 <div>
                     <span className='btn btn-danger w-100 py-3' onClick={e=> disconnect()}>Disconnect</span>
                 </div>
