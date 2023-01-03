@@ -158,8 +158,8 @@ function registerEvents(){
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 400,
-    height: 650,
+    width: 430,
+    height: 700,
     autoHideMenuBar: true,
     // frame: true,
     title: 'SSH Tunnel Proxy',
@@ -206,10 +206,10 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
-    app.quit()
     if(sshProxy){
       await sshProxy.stop()
     }
+    app.quit()
   }
 })
 

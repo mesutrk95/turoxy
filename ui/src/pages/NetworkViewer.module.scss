@@ -1,0 +1,120 @@
+.svg {
+
+    .you2end{
+        transform: translate(-972px, 2px)
+    }
+  fill: white;
+
+  .st0 {
+    fill: #ffffff;
+  }
+  .st1 {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 4;
+    stroke-miterlimit: 10;
+  }
+  .st2 {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+  }
+  .st3 {
+    fill: #ffffff;
+  }
+  .st4 {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 4;
+    stroke-miterlimit: 10;
+  }
+  .st5 { 
+      path{
+        fill: #ffffff5b; 
+
+      }
+  }
+
+  .text { 
+    fill: rgba(255, 255, 255, 0.781); 
+    font-size: 45px;
+    text-align: center;
+    text-anchor: middle;
+  }
+
+  .danger {
+    fill: #e74c3c !important;
+    .st0 {
+        fill: #e74c3c !important;
+        stroke: #e74c3c !important;
+    }
+    .st1 {
+      fill: none; 
+      stroke: #e74c3c !important; 
+    }
+    .st2 {
+      fill: none;
+      stroke: #e74c3c !important; 
+    }
+    .st3 { 
+      fill: #e74c3c !important;
+    }
+    .st4 { 
+      stroke: #e74c3c !important;  
+    }
+
+    &.check{
+        display: none;
+    }
+  }
+  .success {
+    fill: #1abc9c !important;
+    .st0 {
+        fill: #1abc9c !important;
+        stroke: #1abc9c !important;
+    }
+    .st1 {
+      fill: none; 
+      stroke: #1abc9c !important; 
+    }
+    .st2 {
+      fill: none;
+      stroke: #1abc9c !important; 
+    }
+    .st3 { 
+      fill: #1abc9c !important;
+    }
+    .st4 {
+      fill: none; 
+      stroke: #1abc9c !important;  
+    }
+
+  }
+  .warning {
+    fill: #e67e22 !important;
+    .st0 {
+        fill: #e67e22 !important;
+        stroke: #e67e22 !important;
+    }
+    .st1 {
+      fill: none; 
+      stroke: #e67e22 !important; 
+    }
+    .st2 {
+      fill: none;
+      stroke: #e67e22 !important; 
+    }
+    .st3 { 
+      fill: #e67e22 !important;
+    }
+    .st4 {
+      fill: none; 
+      stroke: #e67e22 !important;  
+    }
+    &.check{
+        display: none;
+    }
+
+  }
+}
