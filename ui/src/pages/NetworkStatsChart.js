@@ -87,6 +87,11 @@ const sharedSeriesOpts = {
     pointRadius: 0,
     pointHitRadius: 0,
     tension: 0.4,
+    
+    pointBorderColor: "rgba(0,0,0,0)",
+    pointBackgroundColor: "rgba(0,0,0,0)", 
+    pointHoverBackgroundColor: "rgba(0,0,0,0)",
+    pointHoverBorderColor: "rgba(0,0,0,0)", 
 
     fill: true ,
     backgroundColor: 'rgba(255,255,255,0.1)',  
@@ -95,21 +100,13 @@ const sharedSeriesOpts = {
 
 const uploadOpt = {
     label: 'Upload', 
-    borderColor: '#e67e22',   
-    pointBorderColor: "rgba(0,0,0,0)",
-    pointBackgroundColor: "rgba(0,0,0,0)", 
-    pointHoverBackgroundColor: "rgba(0,0,0,0)",
-    pointHoverBorderColor: "rgba(0,0,0,0)", 
+    borderColor: '#e67e22aa',   
     backgroundColor: '#e67e2244',  
     ...sharedSeriesOpts
 }
 const downloadOpt = {
     label: 'Download', 
-    borderColor: '#16a085', 
-    pointBorderColor: "rgba(0,0,0,0)",
-    pointBackgroundColor: "rgba(0,0,0,0)", 
-    pointHoverBackgroundColor: "rgba(0,0,0,0)",
-    pointHoverBorderColor: "rgba(0,0,0,0)", 
+    borderColor: '#16a085aa',  
 
     backgroundColor: '#16a08544', 
     ...sharedSeriesOpts

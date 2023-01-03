@@ -1,6 +1,7 @@
 
 .chartBottomContainer {
     position: relative;
+    z-index: 0;
     .chartBottom {
         width: 100%;
         background: linear-gradient(to bottom, rgba(255,255,255,0.19) 5%, #ffffff00 100%);
