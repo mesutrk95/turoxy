@@ -1,9 +1,6 @@
 
-.connectionStatus {
-    *{
-        position: relative;
-
-    }
+.connectionStatus { 
+    height: 100vh;
 
     .border { 
         .left{
@@ -23,6 +20,14 @@
             margin-left: 20px; 
         }
         
+    }
+
+    .bottomBox {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+
     }
 
     // .minWidthHost{ 

@@ -4,6 +4,8 @@ import styles from './MainPage.module.scss'
 import uiEvent from '../ui-event-dispatcher' 
 import { useDialog } from '../DialogProvider'
 
+import { TrashIcon, PencilIcon, PlugIcon, ZapIcon, CodespacesIcon } from '@primer/octicons-react'
+
 export default function MainPage(props) {
      
     const [servers, setServers] = useState([])   
@@ -39,6 +41,7 @@ export default function MainPage(props) {
                 }
             })
     }
+
  
     function onConnect(server){ 
         uiEvent.send('connect-server', { time : server.time });
@@ -46,25 +49,22 @@ export default function MainPage(props) {
 
     return (
         <div className={`${styles.mainPage} p-3`}> 
-            <h4>SSH Tunnels</h4>
+            <h6 className="mb-0 text-muted">Configurations</h6>
+            <h3 className="mb-3">SSH Tunnels</h3>
             {
                 servers.map(server => (
-                    <div key={server.time} className={styles.serverItem}>
-                        <h5 className="m-0">
-                            {server.label} 
-                            <small className={styles.ip}>({server.host}:{server.port})</small>
-                        </h5>
-                        <div className='row'>
-                            <div className='col'> 
-                                <div className="btn btn-sm btn-danger mt-2" 
-                                    onClick={ e => onDelete(server) }>Delete</div>    
-                                <div className="btn btn-sm btn-secondary mt-2 ms-2">Edit</div>    
-                            </div>
-                            <div className='col d-flex justify-content-end'> 
-                                <div className="btn btn-sm btn-primary mt-2 ms-2" 
-                                    onClick={e => onConnect(server)}>Connect</div>   
-                            </div>
-   
+                    <div key={server.time} className={` ${styles.serverItem}`}>
+                        <div className="col-auto ps-4 d-flex align-items-center" onClick={e => onConnect(server)}>  
+                            <CodespacesIcon size={24}/>
+                        </div> 
+                        <div className="col ps-3 py-3" onClick={e => onConnect(server)}>
+                            <h5 className="m-0">
+                                {server.label} 
+                            </h5>
+                            <h6 className={`mb-0 ${styles.ip}`}>{server.host}:{server.port}</h6>
+                        </div>
+                        <div className="col-auto d-flex align-items-center px-4" onClick={e => props.onEdit(server)}> 
+                            <PencilIcon size={24}/> 
                         </div> 
                     </div>
                 ))

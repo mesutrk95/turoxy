@@ -5,16 +5,18 @@ import uiEventDispatcher from '../ui-event-dispatcher'
 import { useDialog } from '../DialogProvider' 
 
 export default function AddServer(props) {
-     
-    const [label, setLabel] = useState('')
-    const [host, setHost] = useState('')
-    const [port, setPort] = useState('')
-    const [user, setUser] = useState('')
 
-    const [authMethod, setAuthMethod] = useState('basic') 
-    const [basicAuthPass, setBasicAuthPass] = useState('') 
+    const editMode = props.server ? true: false; 
+     
+    const [label, setLabel] = useState(props.server?.label || '')
+    const [host, setHost] = useState(props.server?.host || '')
+    const [port, setPort] = useState(props.server?.port || '')
+    const [user, setUser] = useState(props.server?.user || '')
+
+    const [authMethod, setAuthMethod] = useState(props.server?.auth.method || 'basic') 
+    const [basicAuthPass, setBasicAuthPass] = useState(props.server?.auth.password || '') 
     const [privateKeyPath, setPrivateKeyPath] = useState('') 
-    const [privateKeyContent, setPrivateKeyContent] = useState('')  
+    const [privateKeyContent, setPrivateKeyContent] = useState(props.server?.auth.privateKey || '')  
     const dialog = useDialog();
  
     useEffect(() => { 
@@ -62,7 +64,7 @@ export default function AddServer(props) {
             return;
         }
 
-        const newServer = { 
+        const newServer = {   
             host, 
             port, 
             user, 
@@ -71,12 +73,17 @@ export default function AddServer(props) {
                 method: authMethod
             } 
         }
+
+        if(editMode){
+            newServer.time = props.server.time;
+        }
+
         if(authMethod == 'basic'){ 
             newServer.auth.password = basicAuthPass; 
         } else if ( authMethod == 'pubkey'){   
             newServer.auth.privateKey = privateKeyContent;  
         }
-        uiEventDispatcher.send('new-server', newServer)  
+        uiEventDispatcher.send('save-server', newServer)  
         props.back();  
     }
 
@@ -86,7 +93,8 @@ export default function AddServer(props) {
     }
     return (
         <div className={`${styles.addServer} p-3`}> 
-            <h3 className="mb-4">New SSH Connection</h3> 
+            <h6 className="mb-0 text-muted">Configuration</h6> 
+            <h3 className="mb-4">{!editMode ? 'New' : 'Edit'} SSH Tunnel</h3> 
             <div className="row">
                 <div className="input-group mb-2">
                     <span className={`${styles.caption} input-group-text`} id="hostname">Host</span>
@@ -158,10 +166,10 @@ export default function AddServer(props) {
             
             <div className="row mt-5">
                 <div className="col-auto text-center">
-                    <div className="btn btn-secondary" onClick={e => props.back()}>cancel</div> 
+                    <div className="btn-glass" onClick={e => props.back()}>Cancel</div> 
                 </div>
                 <div className="col text-center d-flex justify-content-end"> 
-                    <div className="btn btn-primary" onClick={e => addServer()}>Add Server</div>
+                    <div className="btn-glass" onClick={e => addServer()}>{editMode ? 'Save Server' : 'Add Server'}</div>
                 </div>
             </div>
         </div>

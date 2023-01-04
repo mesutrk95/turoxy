@@ -63,12 +63,20 @@ function registerEvents(){
     event.reply('all-servers', allServers) 
   })
   
-  ipcMain.on('new-server', (event, newServer) => {
+  ipcMain.on('save-server', (event, newServer) => {
+    log('save-server', newServer); 
+    if(newServer.time){
+      let server = allServers.find(s => s.time == newServer.time)
+      server.label = newServer.label;
+      server.host = newServer.host;
+      server.port = newServer.port;
+      server.user = newServer.user;
+      server.auth = newServer.auth;
+    } else { 
       let server = { ...newServer, time: new Date().getTime() }
-      log('new-server', server); 
-      allServers.push(server);
-  
-      fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(allServers, null, 2))
+      allServers.push(server); 
+    }
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(allServers, null, 2))
   })   
   
   ipcMain.on('delete-server', (event, server) => { 

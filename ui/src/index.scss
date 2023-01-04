@@ -6,7 +6,10 @@
 
 @font-face {
   font-family: 'Changa';
-  src: url('/fonts/changa/Changa-VariableFont_wght.ttf') ;
+  src: url('/fonts/changa/Changa-VariableFont_wght.ttf') 
+  url('/fonts/changa/static/Changa-Bold.ttf')
+  url('/fonts/changa/static/Changa-Regular.ttf')
+  url('/fonts/changa/static/Changa-Light.ttf') ;
 }
 
 body {
@@ -18,3 +21,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
  
+
+.btn-glass {
+
+  padding: 10px 15px;
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer; 
+  transition: all 0.15s;
+
+  &.circle{
+    border-radius: 100%;
+
+  }
+
+  &:hover{
+    background-color: rgba(255, 255, 255, 0.08);
+    transition: all 0.15s;
+  }
+}

@@ -61,7 +61,7 @@ export default function ConnectionStatus(props) {
     } 
     return (
         <div className={`${styles.connectionStatus} py-3`}>  
-            <h6 className="mb-0">Connection Status</h6>   
+            <h6 className="mb-0 text-muted">Connection Status</h6>   
             
             {
                 conn && conn.server && <h3 className="mb-2">{ conn.server.label }</h3>
@@ -107,12 +107,15 @@ export default function ConnectionStatus(props) {
                     </div>
                 </div>
             }
-            <div className='row mt-5 px-3'>
-                <div>
-                    <span className='btn btn-danger w-100 py-3' onClick={e=> disconnect()}>Disconnect</span>
-                </div>
-            </div>
              
+             <div className={styles.bottomBox}>
+                <div className='row pb-4 px-4'>
+                    <div>
+                        <span className='btn btn-danger w-100 py-3' onClick={e=> disconnect()}>Disconnect</span>
+                    </div>
+                </div>
+
+             </div>
         </div>
     )
 }
