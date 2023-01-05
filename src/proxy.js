@@ -7,7 +7,7 @@ const HttpProxyServer = require("./HttpProxyServer");
 const SSHClient = require("./SSHClient");
 const SSHProxy = require("./SSHProxy");
 
-const DATA_FILE_PATH = path.join(path.join(os.homedir(), '/Documents/proxitor/tunnels.json') )
+const DATA_FILE_PATH = path.join(path.join(os.homedir(), '/Documents/turoxy/tunnels.json') )
 
 let allServers = [];
 if(fs.existsSync(DATA_FILE_PATH)){
