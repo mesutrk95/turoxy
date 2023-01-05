@@ -4,6 +4,9 @@ const httpProxy = require('http-proxy');
 const net = require('net');
 const http = require('http');
 const url = require('url');
+const findPidFromPort = require("find-pid-from-port")
+const findProcess = require('find-process');
+
 const { EventEmitter } = require('stream');
  
 
@@ -51,7 +54,17 @@ class HttpProxyServer extends EventEmitter {
             
             // handle https proxy requests (CONNECT method)
             this.proxy.on('connect', async (clientRequest, clientSocket, head) => {
-                
+                // console.log(clientRequest.socket.localPort, clientRequest.socket.remotePort); 
+
+                // let n = new Date().getTime()
+                // findProcess('port', clientRequest.socket.remotePort)
+                //     .then(function (list) {
+                //         console.log(new Date().getTime() - n , list);
+                //     }, function (err) {
+                //         console.log(err.stack || err);
+                //     })
+
+
                 if(this.onRequest) { 
 
                     let reqUrl = url.parse('https://' + clientRequest.url);   

@@ -28,7 +28,17 @@ function autoSpeedSizeAdjust(amount) {
     else
         return [amount.toFixed(0), ' Bps'];
 }
+function toHHMMSS(secs) {
+    var sec_num = parseInt(secs, 10)
+    var hours   = Math.floor(sec_num / 3600)
+    var minutes = Math.floor(sec_num / 60) % 60
+    var seconds = sec_num % 60
 
+    return [hours,minutes,seconds]
+        .map(v => v < 10 ? "0" + v : v)
+        .filter((v,i) => v !== "00" || i > 0)
+        .join(":")
+}
 export default function ConnectionStatus(props) {
 
     const [conn, setConn] = useState({})
@@ -41,6 +51,7 @@ export default function ConnectionStatus(props) {
         });
         let handler2 = uiEvent.listen('connection-stats', (stats) => {
             const connStats = {
+                startTime: stats.startTime,
                 sent: autoSizeAdjust(stats.sent),
                 received: autoSizeAdjust(stats.received),
                 uploadSpeed: autoSpeedSizeAdjust(stats.speed.upload),
@@ -59,6 +70,7 @@ export default function ConnectionStatus(props) {
     function disconnect() {
         uiEvent.send('ssh-disconnect');
     }
+    
     return (
         <div className={`${styles.connectionStatus} p-0`}>
             <div className='page-header'>
@@ -75,6 +87,10 @@ export default function ConnectionStatus(props) {
                     </div>
 
                 </div>
+                {
+                    stats?.startTime && 
+                    <h2 className="mb-0 mt-3">{toHHMMSS((new Date().getTime() - stats?.startTime) / 1000) }</h2>
+                }
                 {
                     stats &&
                     <div>

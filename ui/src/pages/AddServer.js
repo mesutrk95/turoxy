@@ -91,6 +91,17 @@ export default function AddServer(props) {
         console.log(e.target.value);
         setAuthMethod(e.target.value)
     }
+
+    function deleteServer( ) {
+        dialog.confirm('Confirm Operation', `Are you sure about deleting the '${props.server.label}' tunnel configuration?`, 
+            null , (result) => {
+                if(result.status == 'yes'){
+                    props.onDelete(props.server);
+                }
+            })
+        
+    }
+
     return (
         <div className={`${styles.addServer} p-3`}> 
             <h6 className="mb-0 text-muted">Configuration</h6> 
@@ -169,7 +180,11 @@ export default function AddServer(props) {
                     <div className="btn-glass" onClick={e => props.back()}>Cancel</div> 
                 </div>
                 <div className="col text-center d-flex justify-content-end"> 
-                    <div className="btn-glass" onClick={e => addServer()}>{editMode ? 'Save Server' : 'Add Server'}</div>
+                    {
+                        editMode &&  
+                        <div className="btn-glass me-2" onClick={e => deleteServer()}>Delete </div> 
+                    }
+                    <div className="btn-glass px-5" onClick={e => addServer()}>Save</div>
                 </div>
             </div>
         </div>

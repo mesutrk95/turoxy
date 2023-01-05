@@ -19,6 +19,7 @@ class SSHProxy extends EventEmitter{
 
     statesIntervalHandler
     stats = {
+        startTime: 0,
         sent: 0,
         received: 0,
         speed: {
@@ -46,7 +47,8 @@ class SSHProxy extends EventEmitter{
 
 
     async start(){  
-
+        this.stats.startTime = new Date().getTime();  
+        
         let lastCheckedNetworkSpeed = -1, lastStats ;
         clearInterval(this.statesIntervalHandler)
         this.statesIntervalHandler = setInterval(() => {

@@ -20,7 +20,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron-forge start",
     "package1": "electron-forge package",
-    "package":"npm run build --prefix ui && electron-builder build --win -c.extraMetadata.main=src/index.js --publish never",
+    "package": "npm run build --prefix ui && electron-builder build --win -c.extraMetadata.main=src/index.js --publish never",
     "make": "npm run build --prefix ui && electron-forge make",
     "dev": "concurrently -k \"cd ui && npm start\" \"npm:electron\"",
     "electron": "wait-on tcp:25489 && electron .",
@@ -41,6 +41,7 @@
   "dependencies": {
     "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
+    "find-process": "^1.4.7",
     "global-tunnel-ng": "^2.7.1",
     "http-proxy": "^1.18.1",
     "node-global-proxy": "^1.0.1",

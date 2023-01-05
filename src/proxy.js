@@ -2,11 +2,12 @@ const fs = require("fs");
 const path = require("path");
 const net = require("net");
 const url = require("url");
+const os = require("os");
 const HttpProxyServer = require("./HttpProxyServer");
 const SSHClient = require("./SSHClient");
 const SSHProxy = require("./SSHProxy");
 
-const DATA_FILE_PATH = path.join(__dirname , 'config.json')
+const DATA_FILE_PATH = path.join(path.join(os.homedir(), '/Documents/proxitor/tunnels.json') )
 
 let allServers = [];
 if(fs.existsSync(DATA_FILE_PATH)){

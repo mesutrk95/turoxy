@@ -12,7 +12,7 @@ function setLogFile(lf){
 }
 
 function log(...args){
-    if(isDev) console.log(args);
+    if(isDev) console.log(...args);
     //logEventEmitter.emit('data', args)
     
     try{ 
@@ -25,7 +25,7 @@ function log(...args){
 }  
 
 function log2console(...args){
-    if(isDev) console.log(args);
+    if(isDev) console.log(...args);
     
     try{ 
         logFile?.write('[' + new Date() + '] ' + 

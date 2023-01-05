@@ -23,25 +23,6 @@ export default function MainPage(props) {
             handler.unregister();
         }
     }, [])
-
-    function onDelete(server){
-        dialog.confirm('Confirm Operation', `Are you sure about deleting the '${server.label}' tunnel configuration?`, 
-            null , (result)=>{
-                if(result.status == 'yes'){
-                    console.log('confirmed');
-                    
-                    uiEvent.send('delete-server', { time : server.time });
-                    const handler = uiEvent.listen('server-deleted', ()=>{
-                        handler.unregister();
-
-                        uiEvent.send('get-all-servers');
-                    })
-
-
-                }
-            })
-    }
-
  
     function onConnect(server){ 
         uiEvent.send('connect-server', { time : server.time });

@@ -46,11 +46,21 @@ function App() {
       exceptionHandler.unregister()
       logHandler.unregister() 
     }
-  }, [uiEvents.time])
+  }, [])
 
   function onEdit(server){
     setEditServer(server)
     setPage('edit-server')
+  }
+
+  function onDelete(server) {
+      
+    uiEvents.send('delete-server', { time : server.time });
+    const handler = uiEvents.listen('server-deleted', ()=>{
+        handler.unregister();
+
+        uiEvents.send('get-all-servers');
+    })
   }
 
   return (
@@ -61,7 +71,7 @@ function App() {
 
           { page === 'main' && <MainPage onEdit={ server => onEdit(server) } /> }
           { page === 'add-server' && <AddServer back={()=>setPage('main')} /> }
-          { page === 'edit-server' && <AddServer back={()=>setPage('main')} server={editServer} /> }
+          { page === 'edit-server' && <AddServer back={()=>setPage('main')} onDelete={ s => onDelete(s) } server={editServer} /> }
           { page === 'config' && <AppConfig back={()=>setPage('main')} /> }
           { page === 'ssh-connection' && <ConnectionStatus back={()=>setPage('main')} /> }
           {
