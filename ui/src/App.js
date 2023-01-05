@@ -60,6 +60,7 @@ function App() {
         handler.unregister();
 
         uiEvents.send('get-all-servers');
+        setPage('main')
     })
   }
 

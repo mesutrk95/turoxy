@@ -18,7 +18,7 @@ const { ipcMain , dialog } = require('electron')
  
 const SSHProxy = require('./SSHProxy');   
 
-const LOG_FILE_PATH = path.join(STORE_DIR , 'log.json')
+const LOG_FILE_PATH = path.join(STORE_DIR , 'log.txt')
 const DATA_FILE_PATH = path.join(STORE_DIR , 'tunnels.json')
 const CONFIG_FILE_PATH = path.join(STORE_DIR , 'config.json')
 

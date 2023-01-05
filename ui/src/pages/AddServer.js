@@ -48,7 +48,7 @@ export default function AddServer(props) {
         if(!port || port === '')  throw new Error('The port field cannot be empty!') 
         
         if(authMethod == 'pubkey'){
-            if(!privateKeyPath || privateKeyPath === '') 
+            if(!privateKeyContent || privateKeyContent === '') 
                 throw new Error('Please select private key file for authentication!')  
         }  else if(authMethod == 'basic') { 
             if(!basicAuthPass || basicAuthPass === '') 
