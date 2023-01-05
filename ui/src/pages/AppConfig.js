@@ -55,7 +55,7 @@ export default function AppConfig(props) {
     return (
         <div className={`${styles.addServer} p-3`}>  
             <h6 className="mb-0 text-muted">Configuration</h6> 
-            <h3 className="mb-4">Proxitor Settings</h3> 
+            <h3 className="mb-4">Turoxy Settings</h3> 
             
             <div className="row pt-3 pb-2">
                 <div className="col text-start mx-1" >

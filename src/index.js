@@ -8,7 +8,7 @@ const fs = require('fs')
 const os = require('os');
  
 function getStorePath(){
-  return path.join(os.homedir(), '/Documents/proxitor/')
+  return path.join(os.homedir(), '/Documents/turoxy/')
 }
 const STORE_DIR = getStorePath()
 log(STORE_DIR);
@@ -267,7 +267,7 @@ app.on('window-all-closed', async () => {
   } catch (error) {
     log2console(error)
   }
-  
+
   if (process.platform !== 'darwin') {
     app.quit()
   }
