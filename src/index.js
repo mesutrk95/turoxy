@@ -48,7 +48,7 @@ function init(){
   if(!fs.existsSync(STORE_DIR)){
     fs.mkdirSync(STORE_DIR, { recursive : true })
   } 
-  
+
   if(fs.existsSync(DATA_FILE_PATH)){
     allServers = JSON.parse(fs.readFileSync(DATA_FILE_PATH)) 
   }
@@ -141,7 +141,6 @@ function registerEvents(){
   })
 
   ipcMain.on('ssh-connection', async (event, server) => {  
-    console.log('ssh-connection11111111111111111111' );
      
     event.reply('ssh-connection', { server : selectedServer, status : sshProxy.status})  
   })

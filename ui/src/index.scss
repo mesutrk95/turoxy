@@ -25,9 +25,9 @@ body {
 .btn-glass {
 
   padding: 10px 15px;
-  border-radius: 10px;
-  backdrop-filter: blur(2px);
-  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px; 
+  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.2);
   cursor: pointer; 
   transition: all 0.15s;
 
@@ -37,7 +37,17 @@ body {
   }
 
   &:hover{
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.15);
     transition: all 0.15s;
+  }
+}
+
+.page-header{
+  padding-top: 15px ;
+  // backdrop-filter: blur(6px);
+  // background-color: rgba(255, 255, 255, 0.185);
+
+  .muted{
+    color: rgb(223, 222, 222);
   }
 }

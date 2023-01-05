@@ -1,5 +1,5 @@
 {
-  "name": "ssh-tunnel-proxy-client",
+  "name": "proxitor",
   "version": "1.0.0",
   "description": "ssh tunnel proxy application",
   "authors": "rapiddev",

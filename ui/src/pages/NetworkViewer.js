@@ -29,7 +29,7 @@ export default function NetworkViewer(props) {
     return (
         <div>
             <svg className={styles.svg} version="1.1" id="Layer_2" x="0px" y="0px"
-                viewBox="0 0 1102 500" style={{ 'enable-background': 'new 0 0 1102 586' }} xmlSpace="preserve">
+                viewBox="0 0 1102 500" style={{ enableBackground: 'new 0 0 1102 586' }} xmlSpace="preserve">
 
                 <g id="Layer_3">
                     <g id="desktop2cloud" className={styles[getYourClass()]}>

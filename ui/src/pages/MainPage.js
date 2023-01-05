@@ -48,9 +48,12 @@ export default function MainPage(props) {
     }
 
     return (
-        <div className={`${styles.mainPage} p-3`}> 
-            <h6 className="mb-0 text-muted">Configurations</h6>
-            <h3 className="mb-3">SSH Tunnels</h3>
+        <div className={`${styles.mainPage} p-0`}> 
+            <div className='page-header'> 
+                <h6 className="mb-0 muted">Configurations</h6>
+                <h3 className="mb-0">SSH Tunnels</h3>
+            </div>
+            <div className='p-3'>
             {
                 servers.map(server => (
                     <div key={server.time} className={` ${styles.serverItem}`}>
@@ -69,6 +72,8 @@ export default function MainPage(props) {
                     </div>
                 ))
             }
+
+            </div>
         </div>
     )
 }
