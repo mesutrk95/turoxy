@@ -47,14 +47,14 @@ export default function ConnectionStatus(props) {
                 downloadSpeed: autoSpeedSizeAdjust(stats.speed.download), 
             };
             setStats(connStats)  
-        });
+        }); 
         uiEvent.send('ssh-connection')
         
         return () => { 
             handler1.unregister()
             handler2.unregister()
         }
-    }, [uiEvent.time]) 
+    }, []) 
 
     function disconnect() {
         uiEvent.send('ssh-disconnect');

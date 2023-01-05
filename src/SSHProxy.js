@@ -80,21 +80,20 @@ class SSHProxy extends EventEmitter{
         })
         await this.sshClient.connect(); 
 
-        if(this.config.socksProxy){
+        if(this.config?.socksProxy?.enable){
             this.emitStatus(); 
             this.socksProxy = new SocksProxyServer(this.config.socksProxy);
             this.socksProxy.onRequest = this.handleSocksRequest
             await this.socksProxy.start();   
         }
         
-        if(this.config.httpProxy){
+        if(this.config?.httpProxy?.enable){
             this.emitStatus();
             this.httpProxy = new HttpProxyServer(this.config.httpProxy);
             this.httpProxy.onRequest = this.handleHttpRequest
             this.httpProxy.onOptionsRequest = this.handleHttpOptionsRequest
             await this.httpProxy.start();   
-        }
-
+        } 
         
         this.emitStatus();
         await this.enableSystemProxy();   

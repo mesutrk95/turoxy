@@ -1,25 +1,67 @@
  
-console.log('ok');
-
 // Modules to control application life and create native browser window
+const { log, logEventEmitter, log2console, exceptionEventEmitter,setLogFile } = require('./log')
+
 const isDev = require('electron-is-dev');
 const path = require('path')
 const fs = require('fs')
+const os = require('os');
+ 
+function getStorePath(){
+  return path.join(os.homedir(), '/Documents/proxitor/')
+}
+const STORE_DIR = getStorePath()
+log(STORE_DIR);
+ 
 const { app, BrowserWindow } = require('electron')
 const { ipcMain , dialog } = require('electron')  
-const { log, logEventEmitter, log2console, exceptionEventEmitter } = require('./log')
  
-const SSHProxy = require('./SSHProxy');  
+const SSHProxy = require('./SSHProxy');   
 
-const DATA_FILE_PATH = path.join(__dirname , 'config.json')
+const LOG_FILE_PATH = path.join(STORE_DIR , 'log.json')
+const DATA_FILE_PATH = path.join(STORE_DIR , 'tunnels.json')
+const CONFIG_FILE_PATH = path.join(STORE_DIR , 'config.json')
 
 let selectedServer = null;
 let sshProxy = null;
-let allServers = [];
-if(fs.existsSync(DATA_FILE_PATH)){
-  allServers = JSON.parse(fs.readFileSync(DATA_FILE_PATH)) 
-}
+let logFile = null;
 
+let allServers = [];
+let appConfig = {
+  socksProxy: { 
+    enable: true,
+    host: '127.0.0.1',
+    port: 54612
+  },
+  httpProxy: {
+    enable: true,
+    host: '127.0.0.1',
+    port: 54610
+  },
+  startup: false
+};
+
+function init(){
+  logFile = fs.createWriteStream(LOG_FILE_PATH, {flags : 'w'}); 
+  setLogFile(logFile);
+
+  if(!fs.existsSync(STORE_DIR)){
+    fs.mkdirSync(STORE_DIR, { recursive : true })
+  } 
+  
+  if(fs.existsSync(DATA_FILE_PATH)){
+    allServers = JSON.parse(fs.readFileSync(DATA_FILE_PATH)) 
+  }
+  if(fs.existsSync(CONFIG_FILE_PATH)){
+    let config = JSON.parse(fs.readFileSync(CONFIG_FILE_PATH)) 
+    appConfig = { 
+      ...appConfig, 
+      ...config
+    }
+  }
+
+  log2console('appConfig', appConfig)
+}
 function registerEvents(){
 
   ipcMain.on('select-file-dialog', (event, data) => {
@@ -99,6 +141,8 @@ function registerEvents(){
   })
 
   ipcMain.on('ssh-connection', async (event, server) => {  
+    console.log('ssh-connection11111111111111111111' );
+     
     event.reply('ssh-connection', { server : selectedServer, status : sshProxy.status})  
   })
   
@@ -119,20 +163,13 @@ function registerEvents(){
       ssh.password = selectedServer.auth.password  
     }
   
-    const socksProxy  = {
-      host: '127.0.0.1',
-      port: 54612
-    }
-    const httpProxy  = {
-      host: '127.0.0.1',
-      port: 54610
-    }
   
     if(sshProxy){
       await sshProxy.stop()
       sshProxy = null;
     }
-  
+
+    const { httpProxy, socksProxy}  = appConfig  
     sshProxy = new SSHProxy({ ssh, socksProxy, httpProxy })
     sshProxy.start()
   
@@ -154,6 +191,15 @@ function registerEvents(){
   ipcMain.on('node-log-reg', (event, server) => {   
     log2console('node-log'); 
     logEventEmitter.on('data', data => event.reply('node-log', data))
+  })    
+  ipcMain.on('save-config', (event, config) => {   
+    log2console('save-config'); 
+    appConfig = config;
+    fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(config, null, 2)) 
+  })   
+  ipcMain.on('get-config', (event) => {   
+    log2console('get-config'); 
+    event.reply('app-config', appConfig)
   })    
   
   // ipcMain.on('ready', (event, title) => { 
@@ -200,6 +246,8 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
+  
+  init()
   registerEvents();
 
   app.on('activate', () => {

@@ -26,8 +26,10 @@ function App() {
       console.log('node-log', ...log);
     })
     const connHandler = uiEvents.listen('ssh-connection', (conn) => {
-      setPage('ssh-connection')
       console.log('ssh-connection', conn);
+      // if(page != 'ssh-connection'){ 
+        setPage('ssh-connection')
+      // }
     })
   
     const disHandler = uiEvents.listen('ssh-disconnect', ( ) => {

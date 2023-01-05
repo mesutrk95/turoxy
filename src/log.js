@@ -1,17 +1,38 @@
  
 const { EventEmitter } = require('events');
+const isDev = require('electron-is-dev');
 
 const exceptionEventEmitter = new EventEmitter()
 const logEventEmitter = new EventEmitter()
 
+let logFile = null;
+
+function setLogFile(lf){
+    logFile = lf;
+}
 
 function log(...args){
-    console.log(args);
-    logEventEmitter.emit('data', args)
+    if(isDev) console.log(args);
+    //logEventEmitter.emit('data', args)
+    
+    try{ 
+        logFile?.write('[' + new Date() + '] ' + 
+        args.map(a => typeof(a) == 'object' ? JSON.stringify(a) : a.toString()).join(', ') + '\n');
+    }catch(ex){
+
+    }
+
 }  
 
 function log2console(...args){
-    console.log(args);
+    if(isDev) console.log(args);
+    
+    try{ 
+        logFile?.write('[' + new Date() + '] ' + 
+        args.map(a => typeof(a) == 'object' ? JSON.stringify(a) : a.toString()) + '\n');
+    }catch(ex){
+
+    }
 }  
 
-module.exports = { log, log2console, exceptionEventEmitter, logEventEmitter }
+module.exports = { log, log2console, setLogFile, exceptionEventEmitter, logEventEmitter }
