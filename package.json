@@ -5,6 +5,9 @@
   "authors": "rapiddev",
   "main": "src/index.js",
   "build": {
+    "nsis":{
+      "artifactName": "${productName}-setup-v${version}.${ext}"
+    },
     "files": [
       "ui/build/**/*",
       "node_modules/**/*",
