@@ -4,6 +4,17 @@ import styles from './AddServer.module.scss'
 import uiEventDispatcher from '../ui-event-dispatcher' 
 import { useDialog } from '../DialogProvider' 
 
+function isPrivateKey(content){
+    if(content.indexOf('-----BEGIN RSA PRIVATE KEY-----') > -1 &&
+        content.indexOf('-----END RSA PRIVATE KEY-----') > -1)
+        return true
+    else if(content.indexOf('-----BEGIN OPENSSH PRIVATE KEY-----') > -1 &&
+        content.indexOf('-----END OPENSSH PRIVATE KEY-----') > -1) 
+        return true
+    
+    return false;
+}
+
 export default function AddServer(props) {
 
     const editMode = props.server ? true: false; 
@@ -23,8 +34,7 @@ export default function AddServer(props) {
         const handler = uiEventDispatcher.listen('select-file-result', (files)=>{
             console.log(files); 
             const content = files[0].content
-            if(content.indexOf('-----BEGIN RSA PRIVATE KEY-----') > -1 &&
-                content.indexOf('-----END RSA PRIVATE KEY-----') > -1){
+            if(isPrivateKey(content)){
                 setPrivateKeyPath(files[0].filename) 
                 setPrivateKeyContent(content)
             }else{
