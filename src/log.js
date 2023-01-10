@@ -29,7 +29,7 @@ function log2console(...args){
     
     try{ 
         logFile?.write('[' + new Date() + '] ' + 
-        args.map(a => typeof(a) == 'object' ? JSON.stringify(a) : a.toString()) + '\n');
+        args.map(a => typeof(a) == 'object' ? JSON.stringify(a) : a.toString()).join(', ')  + '\n');
     }catch(ex){
 
     }
