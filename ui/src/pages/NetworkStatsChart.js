@@ -16,6 +16,7 @@ import {
 import { Line } from 'react-chartjs-2'; 
 
 import uiEvent from '../ui-event-dispatcher' 
+import { useTheme } from '../ThemeProvider';
 
 ChartJS.register(
     CategoryScale,
@@ -94,21 +95,20 @@ const sharedSeriesOpts = {
     pointHoverBorderColor: "rgba(0,0,0,0)", 
 
     fill: true ,
-    backgroundColor: 'rgba(255,255,255,0.1)',  
+    backgroundColor: 'rgba(255,255,255,0.55)',  
 
 }
 
 const uploadOpt = {
     label: 'Upload', 
-    borderColor: '#e67e22aa',   
-    backgroundColor: '#e67e2244',  
+    borderColor: 'rgba(230, 126, 34, 0.67)', 
+    // backgroundColor: 'rgba(255,255,255, 0.4)',  
     ...sharedSeriesOpts
 }
 const downloadOpt = {
     label: 'Download', 
-    borderColor: '#16a085aa',  
-
-    backgroundColor: '#16a08544', 
+    borderColor: 'rgba(22, 160, 133, 0.67)',    
+    // backgroundColor: 'rgba(255,255,255, 0.4)', 
     ...sharedSeriesOpts
 }
 
@@ -130,8 +130,7 @@ function initData(){
 }
 function scaleValue(minX, maxX, minY, maxY, value) {  
     return (value - minX) * ((maxY - minY) / (maxX - minX)) + minY;;
-}
-
+} 
 function delay(amount){
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -146,13 +145,10 @@ export default function NetworkStatsChart(props) {
     const [chartData, setChartData] = useState({datasets: []}) 
     const [chartReference, setChartReference] = useState(null) 
 
+    const themeCtx = useTheme() 
+
     useEffect(() => {  
-        initData();
-
-        function lerp (start, end, amt){
-            return (1-amt)*start+amt*end;
-        }
-
+        initData();  
           
         let handler2 = uiEvent.listen('connection-stats', async (stats) => {  
 
@@ -183,7 +179,21 @@ export default function NetworkStatsChart(props) {
             if(chartReference) chartReference.update()
             
         });
-        
+            
+        if(themeCtx.theme == 'barbary'){
+          downloadOpt.backgroundColor = 
+          uploadOpt.backgroundColor = 
+            'rgba(255, 255, 255, 0.55)'
+        }else if(themeCtx.theme == 'natural'){
+          downloadOpt.backgroundColor = 
+          uploadOpt.backgroundColor = 
+            'rgba(255, 255, 255, 0.55)'
+        }else{ 
+          downloadOpt.backgroundColor = 
+          uploadOpt.backgroundColor = 
+            'rgba(255, 255, 255, 0.1)'
+        }
+
         setChartData({  
             labels,  datasets: [ { ...uploadOpt, data: uploadTicks }, { ...downloadOpt, data: downloadTicks } ],
         }) 

@@ -48,6 +48,49 @@ body {
   // background-color: rgba(255, 255, 255, 0.185);
 
   .muted{
-    color: rgb(223, 222, 222);
+    color: rgb(223, 222, 222) ;
   }
 }
+
+.theme-solid {
+    
+}
+
+.theme-natural {
+    
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.226);
+
+  .btn-glass {
+ 
+    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.2);    
+    // box-shadow: 0 0 20px #ffffff8c;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.15); 
+    }
+  }
+
+}
+
+.theme-barbary {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.226) ;
+
+  .btn-glass {
+ 
+    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.3);    
+    // box-shadow: 0 0 20px #ffffff8c;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.15); 
+    }
+  }
+
+  .text-muted{
+    color: rgb(51, 51, 51) !important ;
+  }
+}
+
+
+  

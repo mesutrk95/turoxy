@@ -1,9 +1,26 @@
 
 .addServer {
-
+    height: 100vh;
+    
     .caption {
         min-width: 100px;
         text-align: center;
         display: inline;
+    }
+}
+
+:global(.theme-barbary) {  
+    .addServer { 
+        backdrop-filter: blur(20px);
+        // animation: blur-in 300ms 0.0s forwards; /* Important */
+    } 
+}
+
+@keyframes blur-in {
+    from {
+      backdrop-filter: blur(0px);
+    }
+    to {
+      backdrop-filter: blur(20px);
     }
 }

@@ -11,7 +11,7 @@
   position: relative;
   overflow: hidden;
 
-  // background: url('../public/bg3.jpg');
+  // background: url('../public/bg2.jpg');
   height: 100vh;
   width: 100%; 
   background-size: cover;
@@ -59,4 +59,21 @@
   justify-content: center;
   align-items: center; 
   cursor: pointer;
+}
+
+:global(.theme-solid) {  
+  .App{
+    background: none;
+  }
+}
+:global(.theme-natural) {  
+  .App{
+    background: url('../public/bg2.jpg'); 
+  }
+} 
+
+:global(.theme-barbary) {  
+  .App{
+    background: url('../public/bg3.jpg'); 
+  }
 }

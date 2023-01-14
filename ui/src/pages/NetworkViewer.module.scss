@@ -118,3 +118,21 @@
 
   }
 }
+
+
+
+:global(.theme-natural) {  
+  .svg {
+    .text { 
+      fill: rgb(19, 19, 19);  
+    }
+  }
+} 
+
+:global(.theme-barbary) {  
+  .svg {
+    .text { 
+      fill: rgb(19, 19, 19);   
+    }
+  }
+}

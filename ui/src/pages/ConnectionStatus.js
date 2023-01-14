@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import styles from './ConnectionStatus.module.scss'
 import uiEvent from '../ui-event-dispatcher'
 import { useDialog } from '../DialogProvider'
+import { useTheme } from '../ThemeProvider';
 
 import NetworkViewer from './NetworkViewer'
 import NetworkStatsChart from './NetworkStatsChart'
@@ -44,6 +45,7 @@ export default function ConnectionStatus(props) {
     const [conn, setConn] = useState({})
     const [stats, setStats] = useState(null)
 
+    
 
     useEffect(() => {
         let handler1 = uiEvent.listen('ssh-connection', (conn) => {
@@ -74,8 +76,8 @@ export default function ConnectionStatus(props) {
     return (
         <div className={`${styles.connectionStatus} p-0`}>
             <div className='page-header'>
-                <h6 className="mb-0 text-muted">Connection Status</h6>
-                <h3 className="mb-0">{conn?.server?.label || ''}</h3>
+                <h6 className={`mb-0 text-muted ${styles.headerText}`}>Connection Status</h6>
+                <h3 className={`${styles.headerTextCaption} mb-0`}>{conn?.server?.label || ''}</h3>
             </div>
             <div className='py-3'>
                 <div className='w-100 d-flex justify-content-center mt-1'>
@@ -87,9 +89,10 @@ export default function ConnectionStatus(props) {
                     </div>
 
                 </div>
+                <h6 className={`text-muted mt-3 mb-0`}>Activated Duration</h6>
                 {
                     stats?.startTime && 
-                    <h2 className="mb-0 mt-3">{toHHMMSS((new Date().getTime() - stats?.startTime) / 1000) }</h2>
+                    <h2 className="mb-0 mt-0">{toHHMMSS((new Date().getTime() - stats?.startTime) / 1000) }</h2>
                 }
                 {
                     stats &&

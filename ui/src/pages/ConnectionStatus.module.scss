@@ -34,3 +34,33 @@
     //     min-width: 60px;
     // }
 }
+
+
+:global(.theme-natural) {   
+    .connectionStatus { 
+        color: rgb(14, 14, 14);
+
+        .headerTextCaption {
+            color: rgb(241, 241, 241) !important;
+        }
+        .headerText{
+            color: rgb(255, 255, 255) !important;
+        }
+    }
+}
+  
+
+:global(.theme-barbary) {   
+    .connectionStatus {
+        // backdrop-filter: blur(30px);
+        color: rgb(14, 14, 14);
+
+        .headerTextCaption {
+            color: rgb(241, 241, 241) !important;
+        }
+        .headerText{
+            color: rgb(255, 255, 255) !important;
+        }
+    }
+}
+  

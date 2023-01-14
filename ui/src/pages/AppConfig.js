@@ -15,7 +15,9 @@ export default function AppConfig(props) {
     const [socksProxyEnable, setSocksProxyEnable] = useState('')  
     const [socksProxyHost, setSocksProxyHost] = useState('') 
     const [socksProxyPort, setSocksProxyPort] = useState(0)  
- 
+
+    const [appTheme, setAppTheme] = useState('')  
+    
     useEffect(() => {  
         uiEvent.send('get-config')
         const handler = uiEvent.listen('app-config', config => { 
@@ -26,7 +28,7 @@ export default function AppConfig(props) {
             setSocksProxyEnable(config?.socksProxy?.enable)
             setSocksProxyHost(config?.socksProxy?.host)
             setSocksProxyPort(config?.socksProxy?.port)
-
+            setAppTheme(config?.theme || 'solid')
             console.log('app-config', config);
         })
         return () => { 
@@ -36,6 +38,7 @@ export default function AppConfig(props) {
 
     function saveConfig(){
         let config = {
+            theme: appTheme,
             httpProxy: {
                 enable: httpProxyEnable,
                 host: httpProxyHost,
@@ -46,16 +49,18 @@ export default function AppConfig(props) {
                 host: socksProxyHost,
                 port: socksProxyPort,
             },
-            startup: false
+            startup: false,
         }
         uiEvent.send('save-config', config)
         props.back();
     } 
 
     return (
-        <div className={`${styles.addServer} p-3`}>  
-            <h6 className="mb-0 text-muted">Configuration</h6> 
-            <h3 className="mb-4">Turoxy Settings</h3> 
+        <div className={`${styles.appConfig} px-3`}>  
+            <div className='page-header'>
+                <h6 className={`mb-0 text-muted ${styles.headerText}`}>Configuration</h6>
+                <h3 className={`${styles.headerTextCaption} mb-0`}>Turoxy Settings</h3>
+            </div> 
             
             <div className="row pt-3 pb-2">
                 <div className="col text-start mx-1" >
@@ -110,6 +115,13 @@ export default function AppConfig(props) {
                             value={socksProxyPort} onChange={e => setSocksProxyPort(e.target.value)} />
                 </div>  
             </div> 
+            
+            <h6 className={`text-start mt-2 mb-1 ms-1 `} >Theme</h6>
+            <select class="form-select" value={appTheme} onChange={(event) => setAppTheme(event.target.value)}> 
+                <option value="solid">Solid Color</option>
+                <option value="barbary">Barbary</option>
+                <option value="natural">Natural</option>
+            </select>
  
             
             <div className="row mt-5">
