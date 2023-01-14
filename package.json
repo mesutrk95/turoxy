@@ -1,6 +1,6 @@
 {
   "name": "Turoxy",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "ssh tunnel proxy application",
   "authors": "rapiddev",
   "main": "src/index.js",
