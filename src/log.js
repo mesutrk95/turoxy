@@ -11,19 +11,6 @@ function setLogFile(lf){
     logFile = lf;
 }
 
-function log(...args){
-    if(isDev) console.log(...args);
-    //logEventEmitter.emit('data', args)
-    
-    try{ 
-        logFile?.write('[' + new Date() + '] ' + 
-        args.map(a => typeof(a) == 'object' ? JSON.stringify(a) : a.toString()).join(', ') + '\n');
-    }catch(ex){
-
-    }
-
-}  
-
 function log2console(...args){
     if(isDev) console.log(...args);
     
@@ -34,5 +21,9 @@ function log2console(...args){
 
     }
 }  
+function log(...args){ 
+    log2console(...args)
+}  
+
 
 module.exports = { log, log2console, setLogFile, exceptionEventEmitter, logEventEmitter }

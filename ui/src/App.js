@@ -10,8 +10,8 @@ import AppConfig from './pages/AppConfig';
 
 import uiEvents from './ui-event-dispatcher'
 
-import  {GearIcon, PlusIcon} from '@primer/octicons-react'
-
+import { Helmet } from 'react-helmet';
+import  {GearIcon, PlusIcon} from '@primer/octicons-react'   
 
 function App() {
   const [page, setPage] = useState('main')
@@ -63,38 +63,41 @@ function App() {
         uiEvents.send('get-all-servers');
         setPage('main')
     })
-  } 
-
+  }  
   return (
-    
-    <ThemeProvider>  
-        <div className={`${styles.App}`}> 
-          <div className={styles.bgOverlay}> </div>
-          <div className="" style={{ zIndex: 2}}>
-            <DialogProvider>
+    <>
+      <Helmet>
+        <title>Turoxy v{process.env.REACT_APP_TUROXY_VERSION || '.x'}</title>
+      </Helmet>
+      <ThemeProvider>  
+          <div className={`${styles.App}`}> 
+            <div className={styles.bgOverlay}> </div>
+            <div className="" style={{ zIndex: 2}}>
+              <DialogProvider>
 
-              { page === 'main' && <MainPage onEdit={ server => onEdit(server) } /> }
-              { page === 'add-server' && <AddServer back={()=>setPage('main')} /> }
-              { page === 'edit-server' && <AddServer back={()=>setPage('main')} onDelete={ s => onDelete(s) } server={editServer} /> }
-              { page === 'config' && <AppConfig back={()=>setPage('main')} /> }
-              { page === 'ssh-connection' && <ConnectionStatus back={()=>setPage('main')} /> }
-              {
-                page === 'main' &&  
-                <>
-                  <div className={`btn-glass circle ${styles.addServerBtn}`} onClick={e => setPage('add-server')}>
-                    <PlusIcon size="28"/>
-                  </div>
-                  <div className={`btn-glass circle ${styles.configBtn}`} onClick={e => setPage('config')}>
-                    <GearIcon size="20" />
-                  </div>
-                </>
-              }
+                { page === 'main' && <MainPage onEdit={ server => onEdit(server) } /> }
+                { page === 'add-server' && <AddServer back={()=>setPage('main')} /> }
+                { page === 'edit-server' && <AddServer back={()=>setPage('main')} onDelete={ s => onDelete(s) } server={editServer} /> }
+                { page === 'config' && <AppConfig back={()=>setPage('main')} /> }
+                { page === 'ssh-connection' && <ConnectionStatus back={()=>setPage('main')} /> }
+                {
+                  page === 'main' &&  
+                  <>
+                    <div className={`btn-glass circle ${styles.addServerBtn}`} onClick={e => setPage('add-server')}>
+                      <PlusIcon size="28"/>
+                    </div>
+                    <div className={`btn-glass circle ${styles.configBtn}`} onClick={e => setPage('config')}>
+                      <GearIcon size="20" />
+                    </div>
+                  </>
+                }
 
-            </DialogProvider>
+              </DialogProvider>
 
-          </div>
-        </div> 
-    </ThemeProvider>
+            </div>
+          </div> 
+      </ThemeProvider>
+    </>
   ); 
 }
 

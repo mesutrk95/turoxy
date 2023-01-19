@@ -5,6 +5,7 @@ const { log2console } = require('./log');
 
 class SSHClient extends EventEmitter {
 
+    httpAgent = null;
     config = null;
     conn = null;
     isOpen = false;
@@ -14,6 +15,7 @@ class SSHClient extends EventEmitter {
     constructor(config){
         super();
         this.config = config;
+        this.httpAgent = new SSH2.HTTPAgent(config);
     }
 
     get status()  {

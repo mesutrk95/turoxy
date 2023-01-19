@@ -213,9 +213,9 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 400,
     height: 700,
+    resizable: false,
     autoHideMenuBar: true,
-    // frame: true,
-    title: 'SSH Tunnel Proxy',
+    // frame: true, 
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -277,7 +277,7 @@ app.on('window-all-closed', async () => {
 // code. You can also put them in separate files and require them here.
 
 process.on('uncaughtException', function (error) {  
-  log('uncaughtException' , error);
+  log('uncaughtException' , error , error.stack);
   
   exceptionEventEmitter.emit(error) 
 })

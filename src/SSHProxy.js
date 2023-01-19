@@ -11,20 +11,22 @@ const SSHClient = require('./SSHClient')
 const SocksProxyServer = require('./SocksProxyServer')
 const HttpProxyServer = require('./HttpProxyServer')
 const EventEmitter = require('events');
-const { log } = require('./log');
+const { log, log2console } = require('./log');
 
 class SSHProxy extends EventEmitter{
-
-    openSockets = new Map();
-
+ 
     statesIntervalHandler
     stats = {
         startTime: 0,
-        sent: 0,
-        received: 0,
+        sent: (this.httpProxy?.stats.sent || 0) + (this.socksProxy?.stats.sent || 0),
+        received: (this.httpProxy?.stats.received || 0) + (this.socksProxy?.stats.received || 0),
         speed: {
             download : 0,
             upload: 0,
+        },
+        sockets:{
+            socks: 0,
+            http: 0
         }
     }
 
@@ -67,6 +69,8 @@ class SSHProxy extends EventEmitter{
                     this.stats.speed.download = 1000 * diffDownload / dt;
                     this.stats.speed.upload = 1000 * diffUpload / dt; 
                     this.stats.speed.time = now; 
+                    this.stats.sockets.socks = this.socksProxy?.stats.sockets || 0;
+                    this.stats.sockets.http = this.httpProxy?.stats.sockets || 0;
                 // }
             }
 
@@ -75,7 +79,6 @@ class SSHProxy extends EventEmitter{
         }, 500); 
 
         this.emitStatus();
-        this.httpAgent = new SSH2.HTTPAgent(this.config.ssh);
         this.sshClient = new SSHClient(this.config.ssh);
         this.sshClient.on('status', (status) =>{
             this.emitStatus();
@@ -84,149 +87,24 @@ class SSHProxy extends EventEmitter{
 
         if(this.config?.socksProxy?.enable){
             this.emitStatus(); 
-            this.socksProxy = new SocksProxyServer(this.config.socksProxy);
-            this.socksProxy.onRequest = this.handleSocksRequest
+            this.socksProxy = new SocksProxyServer(this.config.socksProxy); 
+            this.socksProxy.setSSHClient(this.sshClient)
             await this.socksProxy.start();   
         }
         
         if(this.config?.httpProxy?.enable){
             this.emitStatus();
             this.httpProxy = new HttpProxyServer(this.config.httpProxy);
-            this.httpProxy.onRequest = this.handleHttpRequest
-            this.httpProxy.onOptionsRequest = this.handleHttpOptionsRequest
+            this.httpProxy.setSSHClient(this.sshClient) 
             await this.httpProxy.start();   
         } 
         
         this.emitStatus();
         await this.enableSystemProxy();   
     }
-    handleHttpOptionsRequest = (clientReq, clientRes) => {
-        
-        let reqUrl = url.parse(clientReq.url);
-        log('options proxy for http request: ' + reqUrl.href);
-      
-        let options = {
-            host: reqUrl.hostname,
-            port: reqUrl.port,
-            path: reqUrl.path,
-            method: clientReq.method,
-            headers: clientReq.headers,
-            agent: this.httpAgent
-        };
-
-        let serverConnection = http.request(options, (res) => {
-            clientRes.writeHead(res.statusCode, res.headers)
-            res.pipe(clientRes); 
-        });
-        clientReq.pipe(serverConnection);
-
-        clientReq.on('error', (e) => {
-            log('client socket error: ' + e);
-        });
-      
-        serverConnection.on('error', (e) => {
-            log('server connection error: ' + e);
-        }); 
-    }
-
-    handleHttpRequest = (info, accept, deny) => {
-        log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-        
-        this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
-            (err, resultStream) => {
-                
-                log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
-
-                if (err) { 
-                    log('error exception', err);
-                    return deny();
-                    // return;
-                } 
-                const { clientSocket, clientRequest, head} = accept(true);
-                clientSocket.write('HTTP/' + clientRequest.httpVersion + ' 200 Connection Established\r\n' +
-                    'Proxy-agent: Node.js-Proxy\r\n' +
-                        '\r\n', 'UTF-8', () => {
-                    // creating pipes in both ends
-                    resultStream.write(head);
-                    resultStream.pipe(clientSocket);
-                    clientSocket.pipe(resultStream);
-                }); 
-
-                if (clientSocket) { 
-                    try {  
-                        clientSocket.on('data', data => {  
-                           this.stats.sent += data.length 
-                        });
-                        resultStream.on('data', data => {   
-                           this.stats.received += data.length  
-                        });
-                        clientSocket.on('close', data => {    
-                        //    log('closssssssssssssssssssssssssssssssssssssse'); 
-                        });   
-                    } catch (ex) {
-                        log('exception', ex);
-                    }
-                } else {   
-                } 
-        }); 
-
-    }
-    
-    handleSocksRequest = (info, accept, deny)=>{ 
-        log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
-        
-        this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
-            (err, resultStream) => {
-                
-                log(`transmit ${info.srcAddr}:${info.srcPort} <=== ${info.dstAddr}:${info.dstPort}`);   
-
-                if (err) { 
-                    log('error exception', err);
-                    return deny();
-                    // return;
-                } 
-                const clientSocket = accept(true);
-                this.openSockets.set(info.srcPort, clientSocket);
-
-                if (clientSocket) { 
-                    try {  
-                        clientSocket.on('data', data => {  
-                            this.stats.sent += data.length
-                        //    log(this.stats, data.length);
-                        });
-                        resultStream.on('data', data => {   
-                            this.stats.received += data.length 
-                        //    log(this.stats, data.length);
-                        });
-                        clientSocket.on('close', data => {    
-                        //    log('closssssssssssssssssssssssssssssssssssssse');
-                            this.openSockets.delete(info.srcPort)
-                        });  
-
-                        resultStream
-                            .pipe(clientSocket)
-                            .pipe(resultStream)
-                                    .on('error', () => { 
-                                        log(`error in socket write ${info.srcAddr}:${info.srcPort} <== ${info.dstAddr}:${info.dstPort} `);   
-                                    })   
-                    } catch (ex) {
-                        log('exception', ex);
-                    }
-                } else { 
-
-                } 
-        });  
-    }
 
     async stop(){
-        clearInterval(this.statesIntervalHandler)
-
-        log(`socks open sockets: ${this.openSockets.size}`);
-        this.openSockets.forEach((socket,key,map) => {
-            log(`closing socket ${key}...`);
-            socket.end()
-        })
-        this.openSockets.clear();
+        clearInterval(this.statesIntervalHandler) 
 
         log('stopping socks proxy server ...');
         if(this.socksProxy) await this.socksProxy.stop()
