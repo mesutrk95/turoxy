@@ -18,8 +18,8 @@ class SSHProxy extends EventEmitter{
     statesIntervalHandler
     stats = {
         startTime: 0,
-        sent: (this.httpProxy?.stats.sent || 0) + (this.socksProxy?.stats.sent || 0),
-        received: (this.httpProxy?.stats.received || 0) + (this.socksProxy?.stats.received || 0),
+        sent: 0,
+        received: 0,
         speed: {
             download : 0,
             upload: 0,
@@ -62,6 +62,9 @@ class SSHProxy extends EventEmitter{
             }else{
                 const dt = now - lastCheckedNetworkSpeed;
                 // if(dt > 1000){
+                    this.stats.sent = (this.httpProxy?.stats.sent || 0) + (this.socksProxy?.stats.sent || 0)
+                    this.stats.received = (this.httpProxy?.stats.received || 0) + (this.socksProxy?.stats.received || 0)
+
                     const diffDownload = this.stats.received - lastStats.received
                     const diffUpload = this.stats.sent - lastStats.sent 
                     lastStats = { sent : this.stats.sent, received: this.stats.received }
@@ -70,7 +73,7 @@ class SSHProxy extends EventEmitter{
                     this.stats.speed.upload = 1000 * diffUpload / dt; 
                     this.stats.speed.time = now; 
                     this.stats.sockets.socks = this.socksProxy?.stats.sockets || 0;
-                    this.stats.sockets.http = this.httpProxy?.stats.sockets || 0;
+                    this.stats.sockets.http = this.httpProxy?.stats.sockets || 0; 
                 // }
             }
 
