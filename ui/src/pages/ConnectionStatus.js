@@ -76,10 +76,11 @@ export default function ConnectionStatus(props) {
     return (
         <div className={`${styles.connectionStatus} p-0`}>
             <div className='page-header'>
-                <h6 className={`mb-0 text-muted ${styles.headerText}`}>Connection Status</h6>
-                <h3 className={`${styles.headerTextCaption} mb-0`}>{conn?.server?.label || ''}</h3>
+                <h6 className={`${styles.headerText} mb-0 text-muted `}>Connection Status</h6>
+                <h4 className={`${styles.headerTextCaption} mb-0`}>{conn?.server?.label || ''}</h4>
+                <h6 className={` mb-0 mt-0`}><small>{conn?.server?.host || ''}</small></h6>
             </div>
-            <div className='py-3'>
+            <div className='pb-3'>
                 <div className='w-100 d-flex justify-content-center mt-1'>
                     <NetworkStatsChart />
                 </div>

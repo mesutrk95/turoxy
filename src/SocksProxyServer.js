@@ -70,10 +70,10 @@ class SocksProxyServer {
     handleRequest = (info, accept, deny)=>{ 
         log(`request ${info.srcAddr}:${info.srcPort} ===> ${info.dstAddr}:${info.dstPort}`);   
         
-        if(!this.sshClient) {
+        if(!this.sshClient || !this.sshClient.conn || !this.sshClient.isOpen) {
             log('error exception, ssh client doesnt exist\'s.');
             return deny();
-        }
+        } 
 
         this.sshClient.conn.forwardOut(info.srcAddr, info.srcPort, info.dstAddr, info.dstPort,
             (err, resultStream) => {

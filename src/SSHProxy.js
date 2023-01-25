@@ -69,8 +69,8 @@ class SSHProxy extends EventEmitter{
                     const diffUpload = this.stats.sent - lastStats.sent 
                     lastStats = { sent : this.stats.sent, received: this.stats.received }
                     lastCheckedNetworkSpeed = now;
-                    this.stats.speed.download = 1000 * diffDownload / dt;
-                    this.stats.speed.upload = 1000 * diffUpload / dt; 
+                    this.stats.speed.download = 1024 * diffDownload / dt;
+                    this.stats.speed.upload = 1024 * diffUpload / dt; 
                     this.stats.speed.time = now; 
                     this.stats.sockets.socks = this.socksProxy?.stats.sockets || 0;
                     this.stats.sockets.http = this.httpProxy?.stats.sockets || 0; 
@@ -86,7 +86,8 @@ class SSHProxy extends EventEmitter{
         this.sshClient.on('status', (status) =>{
             this.emitStatus();
         })
-        await this.sshClient.connect(); 
+        
+        this.sshClient.connect(); 
 
         if(this.config?.socksProxy?.enable){
             this.emitStatus(); 

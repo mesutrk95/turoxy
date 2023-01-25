@@ -38,6 +38,16 @@ let appConfig = {
     host: '127.0.0.1',
     port: 54610
   },
+  blockList: [
+    'windowsupdate.microsoft.com',
+    'stats.microsoft.com',
+    'update.microsoft.com',
+    'download.microsoft.com',
+    'ntservicepack.microsoft.com',
+    'download.windowsupdate.com',
+    'windowsupdate.com',
+    'wustat.windows.com',
+  ],
   startup: false
 };
 

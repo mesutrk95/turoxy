@@ -131,6 +131,10 @@ class HttpProxyServer extends EventEmitter {
         clientSocket.on('finish', () => this.onSocketClosed(info, 'finish'));
         clientSocket.on('timeout', () => this.onSocketClosed(info, 'timeout')); 
  
+        if(!this.sshClient.conn || !this.sshClient.isOpen){
+            clientSocket.end();
+            return;
+        }
         this.openSockets.set(info.id, {socket: clientSocket, info}); 
         this.stats.sockets = this.openSockets.size;
            
@@ -169,6 +173,7 @@ class HttpProxyServer extends EventEmitter {
      
     stop() {
         return new Promise(async (resolve, reject) => { 
+            this.dead = true;
             log(`http open sockets: ${this.openSockets.size}`);
             this.openSockets.forEach((item, key, map) => {
                 log(`closing http socket ${key}, ${item.info.dstAddr + ':' + item.info.dstPort}`);

@@ -13,5 +13,10 @@ function waitFor(condition, frequence){
         check();
     }) 
 }
+function wait(amount){
+    return new Promise(async (resolve, reject)=>{  
+        setTimeout(async ()=> resolve() , amount) 
+    }) 
+}
 
-module.exports= { waitFor }
+module.exports= { waitFor, wait }

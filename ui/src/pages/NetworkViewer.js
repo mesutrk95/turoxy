@@ -8,16 +8,16 @@ export default function NetworkViewer(props) {
     
     const conn = props.connection
     function getYourClass(){ 
-        if(conn && conn.status){
-            if(conn.status.ssh == "failed") return 'danger' 
-            return  conn.status.ssh == 'connected' ? 'success': 'warning'
+        if(conn && conn.status) {
+            return  conn.status.http == 'started' ? 'success': 'warning'
         }else{
             return 'danger'
         }
     }
     function getServerClass(){
-        if(conn && conn.status) {
-            return  conn.status.http == 'started' ? 'success': 'warning'
+        if(conn && conn.status){
+            if(conn.status.ssh == "failed") return 'danger' 
+            return  conn.status.ssh == 'connected' ? 'success': 'warning'
         }else{
             return 'danger'
         }
@@ -32,7 +32,7 @@ export default function NetworkViewer(props) {
                 viewBox="0 0 1102 500" style={{ enableBackground: 'new 0 0 1102 586' }} xmlSpace="preserve">
 
                 <g id="Layer_3">
-                    <g id="desktop2cloud" className={styles[getYourClass()]}>
+                    <g id="desktop2cloud" className={yourClass}>
                         <path className={styles.st0} d="M518,341.5h-6c-1.1,0-2,0.9-2,2v1c0,1.1,0.9,2,2,2h6c1.1,0,2-0.9,2-2v-1C520,342.4,519.1,341.5,518,341.5z" />
                         <path className={styles.st0} d="M499,341.5h-13c-1.1,0-2,0.9-2,2v1c0,1.1,0.9,2,2,2h13c1.1,0,2-0.9,2-2v-1C501,342.4,500.1,341.5,499,341.5z"
                         />
