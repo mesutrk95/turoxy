@@ -72,6 +72,8 @@ function init(){
 
   log2console('appConfig', appConfig)
 }
+init()
+
 function registerEvents(){
 
   ipcMain.on('select-file-dialog', (event, data) => {
@@ -216,13 +218,15 @@ function registerEvents(){
   //   event.reply('ready', { status :'ok' })
   // })
 }
-
+let mainWindow = null;
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
+    ... appConfig.x && { x: appConfig.x },
+    ... appConfig.y && { y: appConfig.y },
     width: 400,
-    height: 700,
+    height: 700, 
     resizable: false,
     autoHideMenuBar: true,
     // frame: true, 
@@ -242,6 +246,14 @@ const createWindow = () => {
       : `file://${path.join(__dirname, '../ui/build/index.html')}`
   );
 
+  mainWindow.on("close", () => {
+    const bounds = mainWindow.getNormalBounds();
+    appConfig.x = bounds.x;
+    appConfig.y = bounds.y;
+    log2console('save-config');  
+    fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(appConfig, null, 2)) 
+})
+
   // Open the DevTools.
   if (isDev) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
@@ -256,7 +268,6 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow()
   
-  init()
   registerEvents();
 
   app.on('activate', () => {
@@ -270,6 +281,8 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', async () => {
+  
+
   try {
     if(sshProxy){
       await sshProxy.stop()
