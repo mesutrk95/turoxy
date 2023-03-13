@@ -127,16 +127,15 @@ class SSHProxy extends EventEmitter{
     async disableSystemProxy(){ 
         try {
             log('setting registry keys.');
-            // await regedit.putValue({
-            //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-            //         ProxyEnable: { value: 0, type: 'REG_DWORD' }
-            //     }
-            // })
             
-            await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f')
-
+            if(process.platform === "win32"){   
+                await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f')
+            
+            } else if(process.platform === 'linux') {
+                await exec(`gsettings set org.gnome.system.proxy mode 'none'`)
+            }
         } catch(ex){
-
+            log2console(ex.toString())
         }
 
     }
@@ -145,36 +144,31 @@ class SSHProxy extends EventEmitter{
         try{
             log('setting registry keys.');
 
-            let proxyUrl = '';
-            if(this.config.httpProxy){
-                proxyUrl = this.config.httpProxy.host + ':' + this.config.httpProxy.port
-            } else if(this.config.socksProxy) {
-                proxyUrl = 'socks=' + this.config.socks.host + ':' + this.config.socks.port
-            }
-            let proxyOverride = 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*';
+            if(process.platform === "win32"){ 
     
-            // await regedit.putValue({
-            //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-            //         ProxyServer: {
-            //             value: proxyUrl, type: 'REG_SZ'
-            //         },
-            //         ProxyOverride: {
-            //             value: 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*',
-            //             type: 'REG_SZ'
-            //         }
-            //     }
-            // })
-            // await regedit.putValue({
-            //     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings': {
-            //         ProxyEnable: { value: 1, type: 'REG_DWORD' }
-            //     }
-            // })
-            await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f')
-            await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d ${proxyUrl} /f`)
-            await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d ${proxyOverride} /f`)
+                let proxyUrl = '';
+                if(this.config.httpProxy){
+                    proxyUrl = this.config.httpProxy.host + ':' + this.config.httpProxy.port
+                } else if(this.config.socksProxy) {
+                    proxyUrl = 'socks=' + this.config.socks.host + ':' + this.config.socks.port
+                }
+                let proxyOverride = 'localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*';
+        
+                await exec('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f')
+                await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d ${proxyUrl} /f`)
+                await exec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyOverride /t REG_SZ /d ${proxyOverride} /f`)
+        
+            } else if(process.platform === 'linux') { 
+                await exec(`gsettings set org.gnome.system.proxy.http host '${this.config.httpProxy.host}'`)
+                await exec(`gsettings set org.gnome.system.proxy.http port ${this.config.httpProxy.port}`)
+                await exec(`gsettings set org.gnome.system.proxy mode 'manual'`) 
 
+                await exec(`gsettings set org.gnome.system.proxy.https host '${this.config.httpProxy.host}'`)
+                await exec(`gsettings set org.gnome.system.proxy.https port ${this.config.httpProxy.port}`)
+                await exec(`gsettings set org.gnome.system.proxy mode 'manual'`)  
+            }
         } catch (ex){
-
+            log2console(ex.toString())
         }
  
     } 
