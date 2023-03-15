@@ -1,10 +1,17 @@
 {
   "name": "Turoxy",
+  "productName": "Turoxy",
   "version": "1.0.8",
   "description": "ssh tunnel proxy application",
   "authors": "rapiddev",
   "main": "src/index.js",
   "build": {
+    "appId": "org.rapiddev.turoxy",
+    "mac": {
+      "type": "distribution",
+      "target": "dmg",
+      "category": "public.app-category.network"
+    },
     "nsis": {
       "artifactName": "${productName}-setup-v${version}.${ext}"
     },
@@ -23,6 +30,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "set REACT_APP_TUROXY_VERSION=%npm_package_version% && npm run build --prefix ui && electron-builder build --win -c.extraMetadata.main=src/index.js --publish never",
     "package-linux": "export REACT_APP_TUROXY_VERSION=$npm_package_version && npm run build --prefix ui && sudo electron-builder build --linux -c.extraMetadata.main=src/index.js --publish never",
+    "package-mac": "export REACT_APP_TUROXY_VERSION=$npm_package_version && npm run build --prefix ui && sudo electron-builder build --mac -c.extraMetadata.main=src/index.js --publish never",
     "dev": "concurrently -k \"set REACT_APP_TUROXY_VERSION=%npm_package_version% && npm start --prefix ui\" \"npm:electron\"",
     "electron": "wait-on tcp:25489 && electron .",
     "electron-dev": "electron ."
@@ -37,6 +45,7 @@
     "@electron-forge/maker-zip": "^6.0.4",
     "concurrently": "^7.6.0",
     "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
     "wait-on": "^7.0.1"
   },
   "dependencies": {

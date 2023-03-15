@@ -133,6 +133,9 @@ class SSHProxy extends EventEmitter{
             
             } else if(process.platform === 'linux') {
                 await exec(`gsettings set org.gnome.system.proxy mode 'none'`)
+            } else if (process.platform === 'darwin'){
+                await exec(`networksetup -setsecurewebproxystate wi-fi off`)
+                await exec(`networksetup -setwebproxystate wi-fi off`)
             }
         } catch(ex){
             log2console(ex.toString())
@@ -166,6 +169,13 @@ class SSHProxy extends EventEmitter{
                 await exec(`gsettings set org.gnome.system.proxy.https host '${this.config.httpProxy.host}'`)
                 await exec(`gsettings set org.gnome.system.proxy.https port ${this.config.httpProxy.port}`)
                 await exec(`gsettings set org.gnome.system.proxy mode 'manual'`)  
+
+            } else if (process.platform === 'darwin'){
+                
+                await exec(`networksetup -setwebproxystate wi-fi on`) 
+                await exec(`networksetup -setsecurewebproxystate wi-fi on`) 
+                await exec(`networksetup -setwebproxy wi-fi ${this.config.httpProxy.host} ${this.config.httpProxy.port}`) 
+                await exec(`networksetup -setsecurewebproxy wi-fi ${this.config.httpProxy.host} ${this.config.httpProxy.port}`)
             }
         } catch (ex){
             log2console(ex.toString())
