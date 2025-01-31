@@ -1,38 +1,39 @@
 name: Build and Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          
+          node-version: "18.x"
+
       - name: Install Dependencies
         run: |
           npm install
           cd ui && npm install && cd ..
-          
+
       - name: Build Windows
         run: npm run package
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
-          
+
       - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
           path: dist/Turoxy-setup-*.exe
-          
+
       - name: Upload to Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: dist/Turoxy-setup-*.exe
         env:
