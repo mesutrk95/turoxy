@@ -5,6 +5,9 @@
 [![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)]()
 
 A lightweight and secure proxy application leveraging SSH port forwarding capabilities for seamless network traffic tunneling.
+<br/>
+
+<img src="./images/demo.gif" width="300" alt="Demo">
 
 ## 🚀 Quick Start
 
