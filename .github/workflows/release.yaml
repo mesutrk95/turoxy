@@ -59,6 +59,7 @@ jobs:
         run: npm run package-linux
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          CI: false
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
@@ -96,6 +97,7 @@ jobs:
         run: npm run package-mac
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          CI: false
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
