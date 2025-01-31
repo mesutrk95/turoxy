@@ -29,7 +29,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "set REACT_APP_TUROXY_VERSION=%npm_package_version% && npm run build --prefix ui && electron-builder build --win -c.extraMetadata.main=src/index.js --publish never",
-    "package-linux": "export REACT_APP_TUROXY_VERSION=$npm_package_version && npm run build --prefix ui && sudo electron-builder build --linux -c.extraMetadata.main=src/index.js --publish never",
+    "package-linux": "export REACT_APP_TUROXY_VERSION=$npm_package_version && npm run build --prefix ui && electron-builder build --linux -c.extraMetadata.main=src/index.js --publish never",
     "package-mac": "export REACT_APP_TUROXY_VERSION=$npm_package_version && npm run build --prefix ui && sudo electron-builder build --mac -c.extraMetadata.main=src/index.js --publish never",
     "dev": "concurrently -k \"set REACT_APP_TUROXY_VERSION=%npm_package_version% && npm start --prefix ui\" \"npm:electron\"",
     "electron": "wait-on tcp:25489 && electron .",
