@@ -1,6 +1,6 @@
-# Turoxy
+# Turoxy - Secure SSH Proxy Client 
 
-[![License](https://img.shields.io/github/license/mesutrk95/turoxy)](https://github.com/mesutrk95/turoxy/blob/main/LICENSE)
+[![Build Status](https://github.com/mesutrk95/turoxy/actions/workflows/release.yaml/badge.svg)](https://github.com/mesutrk95/turoxy/actions)
 [![GitHub Release](https://img.shields.io/github/v/release/mesutrk95/turoxy)](https://github.com/mesutrk95/turoxy/releases)
 [![Platform Support](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)]()
 
@@ -15,27 +15,6 @@ Download the latest version for your platform:
 - [Windows (x64)](https://github.com/mesutrk95/turoxy/releases)
 - [macOS (x64/ARM)](https://github.com/mesutrk95/turoxy/releases)
 - [Ubuntu/Linux (x64)](https://github.com/mesutrk95/turoxy/releases)
-
-### Running from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/mesutrk95/turoxy.git
-
-# Navigate to the project directory
-cd turoxy
-
-# Install dependencies for core
-npm install
-
-# Install UI dependencies
-cd ./ui
-npm install
-
-# Return to root and start development server
-cd ..
-npm run dev
-```
 
 ## 🔑 Key Features
 
@@ -73,6 +52,28 @@ npm run dev
 - Database connection encryption
 - API testing through secure proxies
 - Remote server administration
+
+### Running from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/mesutrk95/turoxy.git
+
+# Navigate to the project directory
+cd turoxy
+
+# Install dependencies for core
+npm install
+
+# Install UI dependencies
+cd ./ui
+npm install
+
+# Return to root and start development server
+cd ..
+npm run dev
+```
+
 
 ## 📝 Contributing
 
