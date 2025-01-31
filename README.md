@@ -1,4 +1,3 @@
-# ssh-tunnel-proxy-client
 # Turoxy
 
 [![License](https://img.shields.io/github/license/mesutrk95/turoxy)](https://github.com/mesutrk95/turoxy/blob/main/LICENSE)
