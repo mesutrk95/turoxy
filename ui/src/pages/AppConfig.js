@@ -52,6 +52,7 @@ export default function AppConfig(props) {
                 port: socksProxyPort,
             },
             startup: false,
+            asDefaultSystemProxy,
         }
         uiEvent.send('save-config', config)
         props.back();
@@ -102,17 +103,6 @@ export default function AppConfig(props) {
 
                 </div>
             </div>
-            
-            <div className="row pt-3 pb-2">
-                <div className="col text-start mx-1" >
-                    <div className="form-check">
-                        <input className="form-check-input" name="set-as-default-proxy" type="checkbox" value="none" 
-                                onChange={e => setAsDefaultSystemProxy(e.target.checked)} checked={asDefaultSystemProxy}
-                                id="set-as-default-proxy"  />
-                        <label className="form-check-label" htmlFor="set-as-default-proxy"> Set as default system proxy </label>
-                    </div>
-                </div>
-            </div>
 
             <div className="row">
                 <div className="input-group mb-2">
@@ -136,6 +126,17 @@ export default function AppConfig(props) {
                 <option value="natural">Natural</option>
             </select>
  
+            
+            <div className="row pt-3 pb-2">
+                <div className="col text-start mx-1" >
+                    <div className="form-check">
+                        <input className="form-check-input" name="set-as-default-proxy" type="checkbox" value="none" 
+                                onChange={e => setAsDefaultSystemProxy(e.target.checked)} checked={asDefaultSystemProxy}
+                                id="set-as-default-proxy"  />
+                        <label className="form-check-label" htmlFor="set-as-default-proxy"> Set as default system proxy </label>
+                    </div>
+                </div>
+            </div>
             
             <div className="row mt-5">
                 <div className="col-auto text-center">
