@@ -180,8 +180,8 @@ function registerEvents(){
       sshProxy = null;
     }
 
-    const { httpProxy, socksProxy}  = appConfig  
-    sshProxy = new SSHProxy({ ssh, socksProxy, httpProxy })
+    const { httpProxy, socksProxy, asDefaultSystemProxy}  = appConfig  
+    sshProxy = new SSHProxy({ ssh, socksProxy, httpProxy, asDefaultSystemProxy })
     sshProxy.start()
   
     sshProxy.on('status', (status)=>{
