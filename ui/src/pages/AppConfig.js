@@ -27,7 +27,7 @@ export default function AppConfig(props) {
             setHttpProxyPort(config?.httpProxy?.port)
 
             setSocksProxyEnable(config?.socksProxy?.enable)
-            setAsDefaultSystemProxy(config?.asDefaultSystemProxy?.enable || true)
+            setAsDefaultSystemProxy(typeof config?.asDefaultSystemProxy?.enable === 'undefined' ? true : config.asDefaultSystemProxy.enable)
             setSocksProxyHost(config?.socksProxy?.host)
             setSocksProxyPort(config?.socksProxy?.port)
             setAppTheme(config?.theme || 'solid')
