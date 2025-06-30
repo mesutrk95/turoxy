@@ -124,9 +124,12 @@ class SSHProxy extends EventEmitter{
         log('done.');
     }
 
-    async disableSystemProxy(){ 
-        const asDefaultSystemProxy = this.config.asDefaultSystemProxy || true;
-        if(!asDefaultSystemProxy) return;
+    get asDefaultSystemProxy() {  
+        return typeof this.config.asDefaultSystemProxy == 'undefined' ? true : this.config.asDefaultSystemProxy;
+    }
+
+    async disableSystemProxy() {
+        if(!this.asDefaultSystemProxy) return;
 
         try {
             log('setting registry keys.');
@@ -145,10 +148,9 @@ class SSHProxy extends EventEmitter{
         }
 
     }
-    async enableSystemProxy(){ 
 
-        const asDefaultSystemProxy = this.config.asDefaultSystemProxy || true;
-        if(!asDefaultSystemProxy) return;
+    async enableSystemProxy() {
+        if(!this.asDefaultSystemProxy) return;
 
         try{
             log('setting registry keys.');
