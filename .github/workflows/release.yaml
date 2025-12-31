@@ -78,8 +78,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
 
-  release-macos:
-    runs-on: macos-latest
+  release-macos-intel:
+    runs-on: macos-15-intel  # Intel runner
     steps:
       - uses: actions/checkout@v4
 
@@ -93,16 +93,50 @@ jobs:
           npm install
           cd ui && npm install && cd ..
 
-      - name: Build macOS
+      - name: Build macOS Intel
         run: npm run package-mac
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
           CI: false
 
-      - name: Upload macOS Artifacts
+      - name: Upload macOS Intel Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos-artifacts
+          name: macos-intel-artifacts
+          path: dist/*.dmg
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+
+  release-macos-arm:
+    runs-on: macos-latest  # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          cd ui && npm install && cd ..
+
+      - name: Build macOS Apple Silicon
+        run: npm run package-mac
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          CI: false
+
+      - name: Upload macOS ARM Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm-artifacts
           path: dist/*.dmg
 
       - name: Upload to Release
